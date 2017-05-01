@@ -1,20 +1,29 @@
 const gulp = require('gulp');
 const del = require('del');
 const webpack = require('webpack-stream');
+const webpackEngine = require('webpack');
 const connect = require('gulp-connect');
 
 const webpackOptions = {
   entry: './src/ts/space-narwhal.ts',
   output: { filename: 'space-narwhal.js' },
-  devtool: 'source-map',
-  resolve: {
-    extensions: ['', '.webpack.js', '.web.js', '.ts', '.js']
-  },
   module: {
-    loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' }
+    rules: [
+      {
+        enforce: 'pre',
+        test: /\.tsx?$/,
+        use: "source-map-loader"
+      },
+      {
+        test: /\.ts$/,
+        use: [{ loader: 'ts-loader' }]
+      }
     ]
-  }
+  },
+  resolve: {
+    extensions: ['.ts', '.js']
+  },
+  devtool: 'inline-source-map',
 };
 
 function swallowError(error) {
@@ -30,7 +39,7 @@ gulp.task('assets', () => {
 
 gulp.task('scripts', () => {
   return gulp.src(['src/**/*.ts'])
-         .pipe(webpack(webpackOptions))
+         .pipe(webpack(webpackOptions, webpackEngine))
          .on('error', swallowError)
          .pipe(gulp.dest('dist'))
          .pipe(connect.reload());
