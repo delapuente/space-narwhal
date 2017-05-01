@@ -17,10 +17,23 @@ const webpackOptions = {
   }
 };
 
+function swallowError(error) {
+  console.error(error.toString());
+  this.emit('end');
+}
+
+gulp.task('assets', () => {
+  return gulp.src(['src/placeholders/**/*'])
+         .pipe(gulp.dest('dist/placeholders'))
+         .pipe(connect.reload());
+});
+
 gulp.task('scripts', () => {
   return gulp.src(['src/**/*.ts'])
          .pipe(webpack(webpackOptions))
-         .pipe(gulp.dest('dist'));
+         .on('error', swallowError)
+         .pipe(gulp.dest('dist'))
+         .pipe(connect.reload());
 });
 
 gulp.task('html', () => {
@@ -47,6 +60,6 @@ gulp.task('watch', ['build'], () => {
   gulp.watch('src/**/*.ts', ['scripts']);
 });
 
-gulp.task('build', ['scripts', 'html', 'lib']);
+gulp.task('build', ['scripts', 'html', 'lib', 'assets']);
 
 gulp.task('default', ['connect', 'watch']);
