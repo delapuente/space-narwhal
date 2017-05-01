@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES5"
+  },
+
+  "files": [
+    "./typings/index.d.ts",
+    "./src/ts/space-narwhal.ts"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "typings"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "space-narwhal",
+  "version": "1.0.0",
+  "description": "Alien invasion and narwhals!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delapuente/space-narwhal.git"
+  },
+  "keywords": [
+    "html5",
+    "phaser",
+    "narwhal",
+    "alien",
+    "invasion",
+    "shoot'em",
+    "up",
+    "bullet",
+    "storm"
+  ],
+  "author": "Salvador de la Puente González <salva@unoyunodiez.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/delapuente/space-narwhal/issues"
+  },
+  "homepage": "https://github.com/delapuente/space-narwhal#readme",
+  "devDependencies": {
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-connect": "^5.0.0",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.3.2",
+    "webpack": "^2.4.1",
+    "webpack-stream": "^3.2.0"
+  }
+}
