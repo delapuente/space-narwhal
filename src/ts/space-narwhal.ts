@@ -1,18 +1,22 @@
 import Narwhal from './Narwhal';
 import Alien from './Alien';
+import Brain from './Brain';
 import { Diamond, Formation } from './Formation';
 
 class Level extends Phaser.State {
 
-  narwhal: Narwhal;
+  _narwhal: Narwhal;
 
-  formations: Array<Formation>;
+  _formations: Array<Formation>;
+
+  _brains: Array<Alien|Brain>;
 
   keys: { [k: string]: Phaser.Key };
 
   constructor() {
     super();
-    this.formations = [];
+    this._formations = [];
+    this._brains = [];
   }
 
   init() {
@@ -31,21 +35,22 @@ class Level extends Phaser.State {
   }
 
   create() {
-    this._spawnNarwhal();
     this._spawnFormations();
+    this._spawnNarwhal();
   }
 
   update() {
     this._handleInput();
+    this._handleCollisions();
   }
 
   _spawnNarwhal() {
-    this.narwhal = new Narwhal(
+    this._narwhal = new Narwhal(
       this.game,
       this.game.world.centerX,
       this.game.world.centerY
     );
-    this.game.add.existing(this.narwhal);
+    this.game.add.existing(this._narwhal);
   }
 
   _spawnFormations() {
@@ -54,7 +59,8 @@ class Level extends Phaser.State {
     var left = this.game.world.centerX - this.game.world.width / 2;
     var right = this.game.world.centerX + this.game.world.width / 2;
     let enemies = this._getAliens(8);
-    let formation = new Diamond(this.game, enemies, 200);
+    let formation = new Diamond(this.game, enemies, 1, 200);
+    this._brains.push(formation.brain);
     formation.enableRotation(0.01);
     formation.enablePulse(50, 0.2);
     formation.enableMovement(
@@ -69,13 +75,14 @@ class Level extends Phaser.State {
     formation.position.x = this.game.world.centerX;
     formation.position.y = this.game.world.centerY;
     this.game.add.existing(formation);
-    this.formations.push(formation);
+    this._formations.push(formation);
   }
 
   _getAliens(count) {
     const aliens = [];
     for (let i = 0; i < count; i++) {
-      aliens.push(new Alien(this.game, 0, 0));
+      const alien = new Alien(this.game, 0, 0);
+      aliens.push(alien);
     }
     return aliens;
   }
@@ -94,7 +101,23 @@ class Level extends Phaser.State {
     if (this.keys.down.isDown) {
       direction.y = 1;
     }
-    this.narwhal.move(direction);
+    this._narwhal.move(direction);
+  }
+
+  _handleCollisions() {
+    this.game.physics.arcade.overlap(
+      this._narwhal, this._brains,
+      this._onNarwhalVsAlien,
+      isBrain, this
+    );
+
+    function isBrain(_, enemy) {
+      return enemy instanceof Brain;
+    }
+  }
+
+  _onNarwhalVsAlien(narwhal, enemy) {
+    (<Brain>enemy).formation.destroy();
   }
 };
 

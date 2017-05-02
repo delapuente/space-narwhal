@@ -1,8 +1,13 @@
 import Alien from './Alien';
+import Brain from './Brain';
 
 class Formation extends Phaser.Group {
 
   points: Array<PIXI.Point>;
+
+  _brain: Brain;
+
+  _brainPosition: number;
 
   _rotationSpeed: number;
 
@@ -16,19 +21,28 @@ class Formation extends Phaser.Group {
 
   _pathGoal: number;
 
-  constructor(game, enemies) {
-    super(game);
+  constructor(game: Phaser.Game, enemies: Array<Alien>, brainPosition: number) {
+    super(game, game.world, 'group', false, true);
+    this._brain = new Brain(this.game, this);
+    this.game.physics.enable(this._brain);
+    this._brainPosition = brainPosition;
     this.points = [];
     this.addMultiple(enemies.map(enemy => {
       const container = new Phaser.Group(this.game);
       container.addChild(enemy);
       return container;
     }), true);
+    (<Phaser.Group>(this.children[brainPosition])).removeAll();
+    (<Phaser.Group>(this.children[brainPosition])).addChild(this._brain);
     this._rotationSpeed = 0;
     this._pulseParameters = { amplitude: 0, speed: 0 };
     this._startTime = 0;
     this._totalTime = 0;
     this._path = { x: [], y: [] };
+  }
+
+  get brain() {
+    return this._brain;
   }
 
   enableRotation(speed) {
@@ -67,6 +81,21 @@ class Formation extends Phaser.Group {
     this._move(t, dt);
   }
 
+  destroy() {
+    const length = this.children.length;
+    const end = this._brainPosition + length;
+    for (let i = this._brainPosition; i < end; i++) {
+      setTimeout(() => {
+        const index = i % length;
+        const container = (<Phaser.Group>(this.children[index]));
+        const alien = (<Alien>container.children[0]);
+        if (alien) {
+          alien.kill();
+        }
+      }, i * 50);
+    }
+  }
+
   _rotate(t, dt) {
     this.rotation += this._rotationSpeed;
   }
@@ -90,8 +119,8 @@ class Formation extends Phaser.Group {
 
 class Diamond extends Formation {
 
-  constructor(game, enemies: Array<Alien>, radius: number) {
-    super(game, enemies.slice(0, 8));
+  constructor(game, enemies: Array<Alien>, brainPosition: number, radius: number) {
+    super(game, enemies.slice(0, 8), brainPosition);
     this._calculatePoints(radius);
     this.reset();
   }
