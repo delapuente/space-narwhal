@@ -29,12 +29,14 @@ class Level extends Phaser.State {
   }
 
   preload() {
-    this.game.load.image('narwhal', 'placeholders/char-placeholder.png');
-    this.game.load.image('alien', 'placeholders/enemy-placeholder.png');
-    this.game.load.image('brain', 'placeholders/brain-placeholder.png');
+    this.game.load.image('bg-ocean', 'assets/back-01.png');
+    this.game.load.image('narwhal', 'assets/char-01.png');
+    this.game.load.image('alien', 'assets/enemy-01.png');
+    this.game.load.image('brain', 'assets/brain-01.png');
   }
 
   create() {
+    this.game.add.image(0, 0, 'bg-ocean');
     this._spawnFormations();
     this._spawnNarwhal();
   }

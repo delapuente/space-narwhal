@@ -32,8 +32,8 @@ function swallowError(error) {
 }
 
 gulp.task('assets', () => {
-  return gulp.src(['src/placeholders/**/*'])
-         .pipe(gulp.dest('dist/placeholders'))
+  return gulp.src(['src/assets/**/*'])
+         .pipe(gulp.dest('dist/assets'))
          .pipe(connect.reload());
 });
 
