@@ -84,6 +84,7 @@ class Formation extends Phaser.Group {
     this._rotate(t, dt);
     this._pulse(t, dt);
     this._move(t, dt);
+    this._checkOutOfScreen();
   }
 
   _checkDestruction(brain, formationIndex) {
@@ -105,6 +106,9 @@ class Formation extends Phaser.Group {
         if (enemy) {
           enemy.kill();
         }
+        if (i === end) {
+          this.destroy();
+        }
       }, i * 50);
     }
   }
@@ -121,8 +125,11 @@ class Formation extends Phaser.Group {
     const children = (<Array<PIXI.DisplayObjectContainer>>this.children);
     const { amplitude, speed } = this._pulseParameters;
     children.forEach(container => {
-      const alien = container.children[0];
-      alien.y = amplitude * Math.sin(t * speed * dt);
+      const enemy = container.children[0];
+      // Can be absent since it is being reused in another place.
+      if (enemy) {
+        enemy.y = amplitude * Math.sin(t * speed * dt);
+      }
     });
   }
 
@@ -130,6 +137,16 @@ class Formation extends Phaser.Group {
     var percentage = (t - this._path.startTime) / this._path.duration;
     this.x = this.game.math.bezierInterpolation(this._path.x, percentage);
     this.y = this.game.math.bezierInterpolation(this._path.y, percentage);
+  }
+
+  _checkOutOfScreen() {
+    var formationBounds = this.getBounds();
+    var cameraBounds = this.game.camera.bounds;
+    var isOutside =
+      !Phaser.Rectangle.intersects(formationBounds, cameraBounds);
+    if (isOutside) {
+      this._destroyFormation();
+    }
   }
 
 }

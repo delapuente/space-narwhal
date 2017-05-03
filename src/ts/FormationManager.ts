@@ -18,15 +18,18 @@ export default class FormationManager {
 
   _screen: any;
 
-  _brains: Array<Brain>;
+  _enemies: {
+    alien: Array<Alien>;
+    brain: Array<Brain>;
+  };
 
   get brains() {
-    return this._brains;
+    return this._enemies.brain;
   }
 
   constructor(game: Phaser.Game) {
     this._game = game;
-    this._brains = [];
+    this._enemies = { alien: [], brain: [] };
     const semiWidth = this._game.width / 2;
     const semiHeight = this._game.height / 2;
     const centerX = this._game.world.centerX;
@@ -87,19 +90,35 @@ export default class FormationManager {
   }
 
   _getAliens(count: number) {
-    const items = [];
-    for (let i = 0; i < count; i++)  {
-      items.push(new Alien(this._game));
-    }
-    return items;
+    return this._getEnemies(Alien, count);
   }
 
   _getBrains(count: number) {
+    return this._getEnemies(Brain, count);
+  }
+
+  _getEnemies(klass, count: number) {
     const items = [];
-    for (let i = 0; i < count; i++)  {
-      items.push(new Brain(this._game));
+
+    // From the pool
+    var type = klass.name.toLowerCase();
+    for (let i = 0, l = this._enemies[type].length; i < l; i++)  {
+      let enemy = this._enemies[type][i];
+      if (!enemy.alive) {
+        enemy.reset(0, 0);
+        items.push(enemy);
+      }
+      if (items.length === count) {
+        return items;
+      }
     }
-    this._brains.push(...items);
+
+    // Brand new
+    for (let i = 0, l = count - items.length; i < l; i++) {
+      let enemy = new klass(this._game);
+      this._enemies[type].push(enemy);
+      items.push(enemy);
+    }
     return items;
   }
 
