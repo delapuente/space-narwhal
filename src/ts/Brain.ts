@@ -2,16 +2,19 @@ import { Formation } from './Formation';
 
 export default class Brain extends Phaser.Sprite {
 
-  _formation: Formation;
+  _formationIndex: number;
 
-  constructor(game, formation) {
-    super(game, 0, 0, 'brain');
-    this._formation = formation;
-    this.anchor.setTo(0.5, 0.5);
+  get index() {
+    return this._formationIndex;
   }
 
-  get formation() {
-    return this._formation;
+  set index(v) {
+    this._formationIndex = v;
+  }
+
+  constructor(game, x = 0, y = 0) {
+    super(game, x, y, 'brain');
+    this.anchor.setTo(0.5, 0.5);
   }
 
 }

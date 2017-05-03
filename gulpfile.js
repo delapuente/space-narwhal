@@ -37,6 +37,12 @@ gulp.task('assets', () => {
          .pipe(connect.reload());
 });
 
+gulp.task('levels', () => {
+  return gulp.src(['src/levels/**/*'])
+         .pipe(gulp.dest('dist/levels'))
+         .pipe(connect.reload());
+});
+
 gulp.task('scripts', () => {
   return gulp.src(['src/**/*.ts'])
          .pipe(webpack(webpackOptions, webpackEngine))
@@ -66,9 +72,10 @@ gulp.task('connect', () => {
 
 gulp.task('watch', ['build'], () => {
   gulp.watch('src/**/*.html', ['html']);
-  gulp.watch('src/**/*.ts', ['scripts']);
+  gulp.watch('src/ts/**/*.ts', ['scripts']);
+  gulp.watch('src/levels/**/*.json', ['levels']);
 });
 
-gulp.task('build', ['scripts', 'html', 'lib', 'assets']);
+gulp.task('build', ['scripts', 'html', 'lib', 'assets', 'levels']);
 
 gulp.task('default', ['connect', 'watch']);
