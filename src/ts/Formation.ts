@@ -1,29 +1,28 @@
-import Alien from './Alien';
-import Brain from './Brain';
+import { Alien, Brain } from './enemies';
 
-class Formation extends Phaser.Group {
+type Pulse = { amplitude: number, speed: number };
+type Path = {
+  x: Array<number>, y: Array<number>,
+  startTime: number, duration: number
+};
 
-  _rotationSpeed: number;
+abstract class Formation extends Phaser.Group {
 
-  _pulseParameters: { amplitude: number, speed: number };
+  private _rotationSpeed: number = 0;
 
-  _path: {
-    x: Array<number>, y: Array<number>,
-    startTime: number, duration: number
+  private _pulse: Pulse = { amplitude: 0, speed: 0 };
+
+  private _path: Path = {
+    x: [], y: [],
+    startTime: -Infinity, duration: Infinity
   };
 
-  _pathGoal: number;
+  private readonly _brains: Array<Brain> = [];
 
-  _enemies: Array<Alien>;
-
-  _brains: Array<Brain>;
+  protected abstract _buildShape(): Array<Phaser.Group>;
 
   constructor(game: Phaser.Game) {
     super(game);
-    this._rotationSpeed = 1;
-    this._pulseParameters = { amplitude: 0, speed: 0 };
-    this._path = { x: [], y: [], startTime: 0, duration: Infinity };
-    this._brains = [];
   }
 
   init(aliens: Array<Alien>, brains: Array<Brain>, brainPositions: Array<number>) {
@@ -38,14 +37,25 @@ class Formation extends Phaser.Group {
     children.forEach((container, index) => {
       if (brainPositions.indexOf(index) >= 0) {
         const brain = brains.pop();
-        brain.events.onKilled.addOnce(
-          this._checkDestruction, this, 0, index
-        );
-        this._brains.push(brain);
-        container.addChild(brain);
+        if (!brain) {
+          console.error('Insufficient brains to cover all locations.')
+        }
+        else {
+          brain.events.onKilled.addOnce(
+            this._checkDestruction, this, 0, index
+          );
+          this._brains.push(brain);
+          container.addChild(brain);
+        }
       }
       else {
-        container.addChild(aliens.pop());
+        const alien = aliens.pop();
+        if (!alien) {
+          console.error('Insufficient aliens to cover all locations.')
+        }
+        else {
+          container.addChild(alien);
+        }
       }
     });
   }
@@ -59,8 +69,8 @@ class Formation extends Phaser.Group {
   }
 
   enablePulse(amplitude, speed) {
-    this._pulseParameters.amplitude = amplitude;
-    this._pulseParameters.speed = speed;
+    this._pulse.amplitude = amplitude;
+    this._pulse.speed = speed;
   }
 
   disablePulse() {
@@ -82,12 +92,12 @@ class Formation extends Phaser.Group {
     const t = this.game.time.now;
     const dt = this.game.time.physicsElapsed;
     this._rotate(t, dt);
-    this._pulse(t, dt);
+    this._pulsate(t, dt);
     this._move(t, dt);
     this._checkOutOfScreen();
   }
 
-  _checkDestruction(brain, formationIndex) {
+  private _checkDestruction(brain: Brain, formationIndex: number) {
     this._brains.splice(this._brains.indexOf(brain), 1);
     if (this._brains.length) {
       return;
@@ -95,7 +105,7 @@ class Formation extends Phaser.Group {
     this._destroyFormation(formationIndex);
   }
 
-  _destroyFormation(from = 0) {
+  private _destroyFormation(from = 0) {
     const length = this.children.length;
     const end = from + length;
     for (let i = from; i < end; i++) {
@@ -107,23 +117,19 @@ class Formation extends Phaser.Group {
           enemy.kill();
         }
         if (i === end) {
-          this.destroy();
+          this.destroy(false);
         }
       }, i * 50);
     }
   }
 
-  _buildShape() {
-    return [];
-  }
-
-  _rotate(t, dt) {
+  private _rotate(t: number, dt: number) {
     this.rotation += this._rotationSpeed * dt;
   }
 
-  _pulse(t, dt) {
+  private _pulsate(t: number, dt: number) {
     const children = (<Array<PIXI.DisplayObjectContainer>>this.children);
-    const { amplitude, speed } = this._pulseParameters;
+    const { amplitude, speed } = this._pulse;
     children.forEach(container => {
       const enemy = container.children[0];
       // Can be absent since it is being reused in another place.
@@ -133,17 +139,18 @@ class Formation extends Phaser.Group {
     });
   }
 
-  _move(t, dt) {
-    var percentage = (t - this._path.startTime) / this._path.duration;
+  private _move(t: number, dt: number) {
+    const percentage = (t - this._path.startTime) / this._path.duration;
     this.x = this.game.math.bezierInterpolation(this._path.x, percentage);
     this.y = this.game.math.bezierInterpolation(this._path.y, percentage);
   }
 
-  _checkOutOfScreen() {
-    var formationBounds = this.getBounds();
-    var cameraBounds = this.game.camera.bounds;
-    var isOutside =
-      !Phaser.Rectangle.intersects(formationBounds, cameraBounds);
+  private _checkOutOfScreen() {
+    const { x, y, width, height } = this.getBounds();
+    const formationBounds = new Phaser.Rectangle(x, y, width, height);
+    const cameraView = this.game.camera.view;
+    const isOutside =
+      !Phaser.Rectangle.intersects(formationBounds, cameraView);
     if (isOutside) {
       this._destroyFormation();
     }
@@ -151,18 +158,21 @@ class Formation extends Phaser.Group {
 
 }
 
+type DiamonParameters = { radius: number };
 class Diamond extends Formation {
 
-  static locations = 8;
+  private static defaults: DiamonParameters = { radius: 100 };
 
-  _radius: number;
+  private readonly _radius: number;
 
-  constructor(game, { radius }) {
+  static readonly locations = 8;
+
+  constructor(game: Phaser.Game, { radius } = Diamond.defaults) {
     super(game);
     this._radius = radius;
   }
 
-  _buildShape() {
+  protected _buildShape() {
     const _90 = Math.PI/2;
     const _180 = Math.PI;
     return this._calculatePoints(this._radius).map(point => {
@@ -174,7 +184,7 @@ class Diamond extends Formation {
     });
   }
 
-  _calculatePoints(radius: number) {
+  private _calculatePoints(radius: number): Array<Phaser.Point> {
     return [
       new Phaser.Point(0, radius),
       new Phaser.Point(radius/2, radius/2),
@@ -189,4 +199,4 @@ class Diamond extends Formation {
 
 }
 
-export { Diamond, Formation };
+export { Diamond, Formation, Path, Pulse };

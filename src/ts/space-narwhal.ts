@@ -1,20 +1,14 @@
 import Narwhal from './Narwhal';
-import Alien from './Alien';
-import Brain from './Brain';
 import FormationManager from './FormationManager';
 import { Diamond, Formation } from './Formation';
 
 class Level extends Phaser.State {
 
-  _narwhal: Narwhal;
+  private _narwhal: Narwhal;
 
-  _formationManager: FormationManager;
+  private _formationManager: FormationManager;
 
-  _formations: Array<Formation>;
-
-  _brains: Array<Alien|Brain>;
-
-  _keys: { [k: string]: Phaser.Key };
+  private _keys: { [k: string]: Phaser.Key };
 
   init() {
     this._keys = this.game.input.keyboard.addKeys({
@@ -23,8 +17,6 @@ class Level extends Phaser.State {
       up: Phaser.KeyCode.UP,
       down: Phaser.KeyCode.DOWN
     });
-    this._formations = [];
-    this._brains = [];
     this._formationManager = new FormationManager(this.game);
   }
 
@@ -48,7 +40,7 @@ class Level extends Phaser.State {
     this._handleCollisions();
   }
 
-  _spawnNarwhal() {
+  private _spawnNarwhal() {
     this._narwhal = new Narwhal(
       this.game,
       this.game.world.centerX,
@@ -57,16 +49,16 @@ class Level extends Phaser.State {
     this.game.add.existing(this._narwhal);
   }
 
-  _initFormations() {
+  private _initFormations() {
     var levelData = this.game.cache.getJSON('level');
-    this._formationManager.setup(levelData.formations);
+    this._formationManager.init(levelData.formations);
   }
 
-  _spawnFormations() {
+  private _spawnFormations() {
     this._formationManager.spawnFormations();
   }
 
-  _handleInput() {
+  private _handleInput() {
     const direction = { x: 0, y: 0 };
     if (this._keys.left.isDown) {
       direction.x = -1;
@@ -83,11 +75,11 @@ class Level extends Phaser.State {
     this._narwhal.move(direction);
   }
 
-  _handleCollisions() {
+  private _handleCollisions() {
     this.game.physics.arcade.overlap(
       this._narwhal, this._formationManager.brains,
       this._onNarwhalVsBrain,
-      null, this
+      undefined, this
     );
   }
 
