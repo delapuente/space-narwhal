@@ -1438,7 +1438,7 @@ declare module Phaser {
         load: Phaser.Loader;
         lockRender: boolean;
         make: Phaser.GameObjectCreator;
-        math: Phaser.Math;
+        math: typeof Phaser.Math;
         net: Phaser.Net;
         onBlur: Phaser.Signal;
         onFocus: Phaser.Signal;
