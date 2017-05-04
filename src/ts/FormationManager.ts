@@ -1,7 +1,9 @@
 import { Enemy, Alien, Brain } from './enemies';
 import { Path, Pulse, Formation, Diamond } from './Formation';
 
-const FORMATIONS: { [s:string]: { new (): Formation } } = {
+type TypeOf<T> = new(..._) => T;
+
+const FORMATIONS: { [s: string]: TypeOf<Formation> } = {
   'Diamond': Diamond
 };
 
@@ -19,7 +21,7 @@ export default class FormationManager {
 
   private readonly _game: Phaser.Game;
 
-  private readonly _screen: { [s:string]: number };
+  private readonly _screen: { [s: string]: number };
 
   private readonly _enemies: {
     alien: Array<Alien>;
@@ -61,7 +63,7 @@ export default class FormationManager {
   spawnFormations() {
     const now = this._game.time.now;
     if (this._formations.length && now >= this._deadline) {
-      const formationData = this._formations.shift();
+      const formationData = this._formations.shift() as FormationSpec;
       const formation = this._spawnFormation(formationData);
       this._applyEffects(formationData, formation);
       this._updateDeadline();
@@ -108,12 +110,12 @@ export default class FormationManager {
     return this._getEnemies(Brain, count);
   }
 
-  private _getEnemies(klass: {new (): Enemy}, count: number) {
+  private _getEnemies<E extends Enemy>(klass: TypeOf<E>, count: number) {
     const items: Array<Enemy> = [];
 
     // From the pool
     var type = klass.name.toLowerCase();
-    for (let i = 0, l = this._enemies[type].length; i < l; i++)  {
+    for (let i = 0, l = this._enemies[type].length; i < l; i++) {
       let enemy = this._enemies[type][i];
       if (!enemy.alive) {
         enemy.reset(0, 0);

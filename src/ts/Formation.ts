@@ -102,25 +102,29 @@ abstract class Formation extends Phaser.Group {
     if (this._brains.length) {
       return;
     }
-    this._destroyFormation(formationIndex);
+    this._destroyFormation(formationIndex).then(() => {
+      this.destroy(false);
+    });
   }
 
-  private _destroyFormation(from = 0) {
-    const length = this.children.length;
-    const end = from + length;
-    for (let i = from; i < end; i++) {
-      setTimeout(() => {
-        const index = i % length;
-        const container = (<Phaser.Group>(this.children[index]));
-        const enemy = (<Phaser.Sprite>container.children[0]);
-        if (enemy) {
-          enemy.kill();
-        }
-        if (i === end) {
-          this.destroy(false);
-        }
-      }, i * 50);
-    }
+  protected _destroyFormation(from = 0): Promise<void> {
+    return new Promise(fulfil => {
+      const length = this.children.length;
+      const end = from + length;
+      for (let i = from; i < end; i++) {
+        setTimeout(() => {
+          const index = i % length;
+          const container = (<Phaser.Group>(this.children[index]));
+          const enemy = (<Phaser.Sprite>container.children[0]);
+          if (enemy) {
+            enemy.kill();
+          }
+          if (i === end) {
+            fulfil();
+          }
+        }, i * 50);
+      }
+    });
   }
 
   private _rotate(t: number, dt: number) {

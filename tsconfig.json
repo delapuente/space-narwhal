@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "ES5",
+    "target": "es2015",
     "sourceMap": true,
     "allowJs": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "typeRoots" : ["./typings", "./node_modules/@types"]
   },
 
   "files": [
-    "./typings/index.d.ts",
-    "./src/ts/space-narwhal.ts"
+    "./lib/types/phaser.d.ts"
   ],
 
-  "exclude": [
-    "node_modules",
-    "typings"
+  "include": [
+    "./src/ts/**/*"
   ]
 }
