@@ -92,12 +92,13 @@ export default class FormationManager {
 
   private _spawnFormation(formationData: FormationSpec) {
     const { shape, brainPositions } = formationData;
-    const FormationConstructor = FORMATIONS[shape];
-    const totalLocations = FormationConstructor.locations;
+    const FormationClass = FORMATIONS[shape];
+    const formation = new FormationClass(this._game, formationData);
+    const { locations } = formation;
     const brainCount = brainPositions.length;
-    const enemies = this._getAliens(totalLocations - brainCount);
+    const enemies = this._getAliens(locations - brainCount);
     const brains = this._getBrains(brainCount);
-    const formation = new FormationConstructor(this._game, formationData);
+
     formation.init(enemies, brains, brainPositions);
     return this._game.add.existing(formation);
   }
@@ -151,10 +152,9 @@ export default class FormationManager {
       );
     }
 
-    function toPoint([x, y]) {
-      x = x in this._screen ? this._screen[x] : x;
-      y = y in this._screen ? this._screen[y] : y;
-      return new Phaser.Point(x, y);
+    function toPoint([kx, ky]: [number|string, number|string]) {
+      const { [kx]: x = kx, [ky]: y = ky } = this._screen;
+      return new Phaser.Point(<number>x, <number>y);
     }
   }
 

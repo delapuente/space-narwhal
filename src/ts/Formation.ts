@@ -21,6 +21,8 @@ abstract class Formation extends Phaser.Group {
 
   protected abstract _buildShape(): Array<Phaser.Group>;
 
+  readonly abstract locations: number;
+
   constructor(game: Phaser.Game) {
     super(game);
   }
@@ -108,7 +110,7 @@ abstract class Formation extends Phaser.Group {
   }
 
   protected _destroyFormation(from = 0): Promise<void> {
-    return new Promise(fulfil => {
+    return new Promise<void>(fulfil => {
       const length = this.children.length;
       const end = from + length;
       for (let i = from; i < end; i++) {
@@ -169,7 +171,7 @@ class Diamond extends Formation {
 
   private readonly _radius: number;
 
-  static readonly locations = 8;
+  readonly locations = 8;
 
   constructor(game: Phaser.Game, { radius } = Diamond.defaults) {
     super(game);

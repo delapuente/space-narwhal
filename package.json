@@ -29,7 +29,6 @@
   },
   "homepage": "https://github.com/delapuente/space-narwhal#readme",
   "devDependencies": {
-    "@types/es6-promise": "0.0.32",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-connect": "^5.0.0",
