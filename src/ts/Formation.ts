@@ -1,6 +1,7 @@
 import { Alien, Brain } from './enemies';
 
 type Pulse = { amplitude: number, speed: number };
+
 type Path = {
   x: Array<number>, y: Array<number>,
   startTime: number, duration: number
@@ -179,13 +180,13 @@ class Diamond extends Formation {
   }
 
   protected _buildShape() {
-    const _90 = Math.PI/2;
+    const _90 = Math.PI / 2;
     const _180 = Math.PI;
     return this._calculatePoints(this._radius).map(point => {
       const container = new Phaser.Group(this.game);
       container.position = point;
-      container.rotation = Math.atan(point.y/point.x) +
-                           _90 + (point.x < 0 ? _180 : 0);
+      container.rotation = Math.atan(point.y / point.x) +
+        _90 + (point.x < 0 ? _180 : 0);
       return container;
     });
   }
@@ -193,13 +194,13 @@ class Diamond extends Formation {
   private _calculatePoints(radius: number): Array<Phaser.Point> {
     return [
       new Phaser.Point(0, radius),
-      new Phaser.Point(radius/2, radius/2),
+      new Phaser.Point(radius / 2, radius / 2),
       new Phaser.Point(radius, 0),
-      new Phaser.Point(radius/2, -radius/2),
+      new Phaser.Point(radius / 2, -radius / 2),
       new Phaser.Point(0, -radius),
-      new Phaser.Point(-radius/2, -radius/2),
+      new Phaser.Point(-radius / 2, -radius / 2),
       new Phaser.Point(-radius, 0),
-      new Phaser.Point(-radius/2, radius/2)
+      new Phaser.Point(-radius / 2, radius / 2)
     ];
   }
 

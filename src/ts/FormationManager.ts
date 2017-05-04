@@ -1,7 +1,7 @@
 import { Enemy, Alien, Brain } from './enemies';
 import { Path, Pulse, Formation, Diamond } from './Formation';
 
-type TypeOf<T> = new(..._) => T;
+type TypeOf<T> = new (..._) => T;
 
 const FORMATIONS: { [s: string]: TypeOf<Formation> } = {
   'Diamond': Diamond
@@ -152,7 +152,7 @@ export default class FormationManager {
       );
     }
 
-    function toPoint([kx, ky]: [number|string, number|string]) {
+    function toPoint([kx, ky]: [number | string, number | string]) {
       const { [kx]: x = kx, [ky]: y = ky } = this._screen;
       return new Phaser.Point(<number>x, <number>y);
     }
