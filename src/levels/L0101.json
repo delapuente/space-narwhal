@@ -1,36 +1,16 @@
 {
   "formations": [
     {
-      "shape": "Diamond",
-      "radius": 200,
-      "brainPositions": [0, 4],
-      "rotate": 1,
-      "pulse": { "amplitude": 50, "speed": 0.2 },
+      "delay": 4,
+      "shape": "Delta",
+      "radius": 100,
+      "brainPositions": [2],
       "follow": {
         "path": [
-          ["centerX", "top"],
-          ["left", "centerY"],
-          ["right", "centerY"],
-          ["centerX", "bottom"]
+          ["randomX", "top"],
+          ["randomX", "bottom"]
         ],
-        "duration": 10
-      }
-    },
-    {
-      "delay": 10,
-      "shape": "Diamond",
-      "radius": 200,
-      "brainPositions": [0, 4],
-      "rotate": 1,
-      "pulse": { "amplitude": 50, "speed": 0.2 },
-      "follow": {
-        "path": [
-          ["centerX", "top"],
-          ["left", "centerY"],
-          ["right", "centerY"],
-          ["centerX", "bottom"]
-        ],
-        "duration": 10
+        "duration": 5
       }
     }
   ]

@@ -1,10 +1,11 @@
 import { Enemy, Alien, Brain } from './enemies';
-import { Path, Pulse, Formation, Diamond } from './Formation';
+import { Path, Pulse, Formation, Diamond, Delta } from './Formation';
 
 type TypeOf<T> = new (..._) => T;
 
 const FORMATIONS: { [s: string]: TypeOf<Formation> } = {
-  'Diamond': Diamond
+  'Diamond': Diamond,
+  'Delta': Delta
 };
 
 type FormationSpec = {
@@ -51,7 +52,15 @@ export default class FormationManager {
     const bottom = centerY + semiHeight;
     const left = centerX - semiWidth;
     const right = centerX + semiWidth;
-    this._screen = { centerX, centerY, top, bottom, left, right };
+    this._screen = {
+      centerX, centerY, top, bottom, left, right,
+      get randomX() {
+        return Math.random() * (this.right - this.left) + this.left;
+      },
+      get randomY() {
+        return Math.random() * (this.bottom - this.top) + this.top;
+      }
+    };
   }
 
   init(formations: Array<FormationSpec>) {
@@ -63,7 +72,7 @@ export default class FormationManager {
   spawnFormations() {
     const now = this._game.time.now;
     if (this._formations.length && now >= this._deadline) {
-      const formationData = this._formations.shift() as FormationSpec;
+      const formationData = this._formations[0] as FormationSpec;//this._formations.shift() as FormationSpec;
       const formation = this._spawnFormation(formationData);
       this._applyEffects(formationData, formation);
       this._updateDeadline();

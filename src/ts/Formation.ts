@@ -105,12 +105,14 @@ abstract class Formation extends Phaser.Group {
     if (this._brains.length) {
       return;
     }
-    this._destroyFormation(formationIndex).then(() => {
-      this.destroy(false);
-    });
+    this._destroyFormation();
   }
 
-  protected _destroyFormation(from = 0): Promise<void> {
+  private _destroyFormation() {
+    this._destroyShape().then(() => this.destroy(false));
+  }
+
+  protected _destroyShape(from = 0): Promise<void> {
     return new Promise<void>(fulfil => {
       const length = this.children.length;
       const end = from + length;
@@ -206,4 +208,40 @@ class Diamond extends Formation {
 
 }
 
-export { Diamond, Formation, Path, Pulse };
+class Delta extends Formation {
+
+  private static defaults: DiamonParameters = { radius: 100 };
+
+  private readonly _radius: number;
+
+  constructor(game: Phaser.Game, { radius } = Delta.defaults) {
+    super(game);
+    this._radius = radius;
+  }
+
+  readonly locations = 5;
+
+  protected _buildShape() {
+    const _90 = Math.PI / 2;
+    const _180 = Math.PI;
+    return this._calculatePoints(this._radius).map(point => {
+      const container = new Phaser.Group(this.game);
+      container.position = point;
+      container.rotation = Math.atan(point.y / point.x) +
+        _90 + (point.x < 0 ? _180 : 0);
+      return container;
+    });
+  }
+
+  private _calculatePoints(radius: number): Array<Phaser.Point> {
+    return [
+      new Phaser.Point(radius, 0),
+      new Phaser.Point(radius / 2, radius / 2),
+      new Phaser.Point(0, radius),
+      new Phaser.Point(-radius / 2, radius / 2),
+      new Phaser.Point(-radius, 0),
+    ];
+  }
+}
+
+export { Diamond, Delta, Formation, Path, Pulse };
