@@ -1,70 +1,50 @@
-import { Alien, Brain } from './enemies';
+import { Enemy, Alien, Brain } from './enemies';
 
-type Pulse = { amplitude: number, speed: number };
+const DEG_90 = Math.PI / 2;
+const DEG_180 = Math.PI;
+const DEG_360 = 2 * Math.PI;
+
+type Pulse = { amplitude: number, frequency: number };
 
 type Path = {
   x: Array<number>, y: Array<number>,
   startTime: number, duration: number
 };
 
-abstract class Formation extends Phaser.Group {
+abstract class RadialFormation extends Phaser.Group {
 
-  private _rotationSpeed: number = 0;
+  abstract locations: Array<Phaser.Point>;
 
-  private _pulse: Pulse = { amplitude: 0, speed: 0 };
+  private readonly _brains: Array<Brain> = [];
+
+  private _rotation: number = 0;
 
   private _path: Path = {
     x: [], y: [],
     startTime: -Infinity, duration: Infinity
   };
 
-  private readonly _brains: Array<Brain> = [];
+  private _physicsTimeTotal: number = 0;
 
-  protected abstract _buildShape(): Array<Phaser.Group>;
-
-  readonly abstract locations: number;
+  private _pulse: Pulse = { amplitude: 0, frequency: 0 };
 
   constructor(game: Phaser.Game) {
     super(game);
   }
 
   init(aliens: Array<Alien>, brains: Array<Brain>, brainPositions: Array<number>) {
-    const alienContainers = this._buildShape();
-    this.addMultiple(alienContainers, true);
-
     //TODO: Enable physics for aliens
-    brains.forEach(brain => this.game.physics.enable(brain));
-
-    // Assign enemies to containers
-    const children = (<Array<PIXI.DisplayObjectContainer>>this.children);
-    children.forEach((container, index) => {
-      if (brainPositions.indexOf(index) >= 0) {
-        const brain = brains.pop();
-        if (!brain) {
-          console.error('Insufficient brains to cover all locations.')
-        }
-        else {
-          brain.onBurst.addOnce(
-            this._checkDestruction, this, 0, index
-          );
-          this._brains.push(brain);
-          container.addChild(brain);
-        }
-      }
-      else {
-        const alien = aliens.pop();
-        if (!alien) {
-          console.error('Insufficient aliens to cover all locations.')
-        }
-        else {
-          container.addChild(alien);
-        }
-      }
+    brains.forEach(brain => {
+      brain.onBurst.addOnce(this._tryToDestroy, this);
+      this.game.physics.enable(brain);
+      this._brains.push(brain);
     });
+
+    this._place(aliens, brains, brainPositions);
   }
 
   enableRotation(speed) {
-    this._rotationSpeed = speed;
+    this._rotation = speed;
   }
 
   disableRotation() {
@@ -73,7 +53,7 @@ abstract class Formation extends Phaser.Group {
 
   enablePulse(amplitude, speed) {
     this._pulse.amplitude = amplitude;
-    this._pulse.speed = speed;
+    this._pulse.frequency = speed;
   }
 
   disablePulse() {
@@ -83,8 +63,8 @@ abstract class Formation extends Phaser.Group {
   enableMovement(path: Array<PIXI.Point>, time) {
     this._path.x = path.map(point => point.x);
     this._path.y = path.map(point => point.y);
-    this._path.startTime = this.game.time.now;
-    this._path.duration = time * 1000;
+    this._path.startTime = this._physicsTimeTotal;
+    this._path.duration = time;
   }
 
   disabledMovement() {
@@ -92,20 +72,12 @@ abstract class Formation extends Phaser.Group {
   }
 
   update() {
-    const t = this.game.time.now;
     const dt = this.game.time.physicsElapsed;
+    const t = this._physicsTimeTotal += dt;
     this._rotate(t, dt);
     this._pulsate(t, dt);
     this._move(t, dt);
     this._checkOutOfScreen();
-  }
-
-  private _checkDestruction(brain: Brain, formationIndex: number) {
-    this._brains.splice(this._brains.indexOf(brain), 1);
-    if (this._brains.length) {
-      return;
-    }
-    this._destroyFormation(formationIndex);
   }
 
   private _checkOutOfScreen() {
@@ -119,33 +91,29 @@ abstract class Formation extends Phaser.Group {
     }
   }
 
-  private _destroyFormation(formationIndex) {
-    this._destroyShape(formationIndex).then(
+  private _destroyAnimated() {
+    this._destroyShape().then(
       () => this.destroy(false)
     );
   }
 
   private _destroyImmediately() {
-    this.children.forEach(container => container[0] && container[0].kill());
     this.destroy(false);
   }
 
-  protected _destroyShape(from = 0): Promise<void> {
+  protected _destroyShape(): Promise<void> {
     return new Promise<void>(fulfil => {
       const length = this.children.length;
-      const end = from + length;
-      for (let i = from; i < end; i++) {
+      for (let index = 0; index < length; index++) {
         setTimeout(() => {
-          const index = i % length;
-          const container = (<Phaser.Group>(this.children[index]));
-          const enemy = (<Phaser.Sprite>container.children[0]);
+          const enemy = this.children[index] as Enemy;
           if (enemy) {
             enemy.kill();
           }
-          if (i === end - 1) {
+          if (index === length - 1) {
             fulfil();
           }
-        }, (i - from) * 50);
+        }, index * 50);
       }
     });
   }
@@ -156,51 +124,57 @@ abstract class Formation extends Phaser.Group {
     this.y = this.game.math.bezierInterpolation(this._path.y, percentage);
   }
 
-  private _pulsate(t: number, dt: number) {
-    const children = (<Array<PIXI.DisplayObjectContainer>>this.children);
-    const { amplitude, speed } = this._pulse;
-    children.forEach(container => {
-      const enemy = container.children[0];
-      // Can be absent since it is being reused in another place.
+  private _place(aliens: Array<Alien>, brains: Array<Brain>, brainPositions: Array<number>) {
+    this.locations.forEach(({ x, y }, index) => {
+      const isBrainPlace = brainPositions.indexOf(index) >= 0;
+      const enemy = isBrainPlace ? brains.pop() : aliens.pop();
       if (enemy) {
-        enemy.y = amplitude * Math.sin(t * speed * dt);
+        enemy.reset(x, y);
+        enemy.rotation = Math.atan(y / x) + DEG_90 + (x < 0 ? DEG_180 : 0);
+        this.addChild(enemy);
+      }
+    });
+  }
+
+  private _pulsate(t: number, dt: number) {
+    const children = this.children as Array<Enemy>;
+    const { amplitude, frequency } = this._pulse;
+    children.forEach(enemy => {
+      const { rotation, distance } = enemy;
+      if (distance === undefined) {
+        console.error('Enemy is not correctly placed in the formation.');
+      }
+      else {
+        const offset = distance + amplitude;
+        const displacement =
+          amplitude * Math.sin(DEG_360 * frequency * t) + offset;
+        enemy.x = displacement * Math.cos(rotation - DEG_90);
+        enemy.y = displacement * Math.sin(rotation - DEG_90);
       }
     });
   }
 
   private _rotate(t: number, dt: number) {
-    this.rotation += this._rotationSpeed * dt;
+    this.rotation += this._rotation * dt;
   }
 
+  private _tryToDestroy(brain: Brain) {
+    this._brains.splice(this._brains.indexOf(brain), 1);
+    if (this._brains.length === 0) {
+      this._destroyAnimated();
+    }
+  }
 }
 
 type DiamonParameters = { radius: number };
-class Diamond extends Formation {
+class Diamond extends RadialFormation {
 
   private static defaults: DiamonParameters = { radius: 100 };
 
   private readonly _radius: number;
 
-  readonly locations = 8;
-
-  constructor(game: Phaser.Game, { radius } = Diamond.defaults) {
-    super(game);
-    this._radius = radius;
-  }
-
-  protected _buildShape() {
-    const _90 = Math.PI / 2;
-    const _180 = Math.PI;
-    return this._calculatePoints(this._radius).map(point => {
-      const container = new Phaser.Group(this.game);
-      container.position = point;
-      container.rotation = Math.atan(point.y / point.x) +
-        _90 + (point.x < 0 ? _180 : 0);
-      return container;
-    });
-  }
-
-  private _calculatePoints(radius: number): Array<Phaser.Point> {
+  get locations() {
+    const radius = this._radius;
     return [
       new Phaser.Point(0, radius),
       new Phaser.Point(radius / 2, radius / 2),
@@ -213,9 +187,35 @@ class Diamond extends Formation {
     ];
   }
 
+  constructor(game: Phaser.Game, { radius } = Diamond.defaults) {
+    super(game);
+    this._radius = radius;
+  }
+
+  protected _buildShape() {
+    return this.locations.map(point => {
+      const container = new Phaser.Group(this.game);
+      container.position = point;
+      container.rotation = Math.atan(point.y / point.x) +
+        DEG_90 + (point.x < 0 ? DEG_180 : 0);
+      return container;
+    });
+  }
+
 }
 
-class Delta extends Formation {
+class Delta extends RadialFormation {
+
+  get locations(): Array<Phaser.Point> {
+    const radius = this._radius;
+    return [
+      new Phaser.Point(radius, 0),
+      new Phaser.Point(radius / 2, radius / 2),
+      new Phaser.Point(0, radius),
+      new Phaser.Point(-radius / 2, radius / 2),
+      new Phaser.Point(-radius, 0),
+    ];
+  }
 
   private static defaults: DiamonParameters = { radius: 100 };
 
@@ -226,29 +226,6 @@ class Delta extends Formation {
     this._radius = radius;
   }
 
-  readonly locations = 5;
-
-  protected _buildShape() {
-    const _90 = Math.PI / 2;
-    const _180 = Math.PI;
-    return this._calculatePoints(this._radius).map(point => {
-      const container = new Phaser.Group(this.game);
-      container.position = point;
-      container.rotation = Math.atan(point.y / point.x) +
-        _90 + (point.x < 0 ? _180 : 0);
-      return container;
-    });
-  }
-
-  private _calculatePoints(radius: number): Array<Phaser.Point> {
-    return [
-      new Phaser.Point(radius, 0),
-      new Phaser.Point(radius / 2, radius / 2),
-      new Phaser.Point(0, radius),
-      new Phaser.Point(-radius / 2, radius / 2),
-      new Phaser.Point(-radius, 0),
-    ];
-  }
 }
 
-export { Diamond, Delta, Formation, Path, Pulse };
+export { Diamond, Delta, RadialFormation, Path, Pulse };

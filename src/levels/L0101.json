@@ -10,7 +10,8 @@
           [200, "bottom"]
         ],
         "duration": 5
-      }
+      },
+      "pulse": { "amplitude": 3, "frequency": 0.4 }
     },
     {
       "delay": 4,
@@ -23,7 +24,8 @@
           [300, "bottom"]
         ],
         "duration": 5
-      }
+      },
+      "pulse": { "amplitude": 3, "frequency": 0.4 }
     },
     {
       "delay": 4,
@@ -36,7 +38,8 @@
           [400, "bottom"]
         ],
         "duration": 5
-      }
+      },
+      "pulse": { "amplitude": 3, "frequency": 0.4 }
     }
   ]
 }

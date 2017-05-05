@@ -35,7 +35,7 @@ class Level extends Phaser.State {
   }
 
   update() {
-    this._spawnFormations();
+    this._formationManager.update();
     this._handleInput();
     this._handleCollisions();
   }
@@ -52,10 +52,6 @@ class Level extends Phaser.State {
   private _initFormations() {
     var levelData = this.game.cache.getJSON('level');
     this._formationManager.init(levelData.formations);
-  }
-
-  private _spawnFormations() {
-    this._formationManager.spawnFormations();
   }
 
   private _handleInput() {

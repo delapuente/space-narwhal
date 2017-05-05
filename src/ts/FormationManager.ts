@@ -1,19 +1,23 @@
 import { Enemy, Alien, Brain } from './enemies';
-import { Path, Pulse, Formation, Diamond, Delta } from './Formation';
+import { Path, Pulse, RadialFormation, Diamond, Delta } from './Formation';
 
 type TypeOf<T> = new (..._) => T;
 
-const FORMATIONS: { [s: string]: TypeOf<Formation> } = {
+const FORMATIONS: { [s: string]: TypeOf<RadialFormation> } = {
   'Diamond': Diamond,
   'Delta': Delta
 };
+
+type PulseSpec = Pulse;
+
+type PathSpec = Array<[string|number, string|number]>;
 
 type FormationSpec = {
   shape: string,
   brainPositions: Array<number>,
   rotate?: number,
-  pulse?: Pulse,
-  path?: Path,
+  pulse?: PulseSpec,
+  follow?: { path: PathSpec, duration: number },
   delay?: number,
   at?: number
 };
@@ -21,6 +25,8 @@ type FormationSpec = {
 export default class FormationManager {
 
   private readonly _game: Phaser.Game;
+
+  private _physicsTimeTotal: number = 0;
 
   private readonly _screen: { [s: string]: number };
 
@@ -44,6 +50,7 @@ export default class FormationManager {
 
   constructor(game: Phaser.Game) {
     this._game = game;
+    //TODO: Inject in the constructor.
     const semiWidth = this._game.width / 2;
     const semiHeight = this._game.height / 2;
     const centerX = this._game.world.centerX;
@@ -65,18 +72,15 @@ export default class FormationManager {
 
   init(formations: Array<FormationSpec>) {
     this._formations = formations;
-    this._timeOrigin = this._game.time.now;
+    this._timeOrigin = this._physicsTimeTotal;
+    this._allocateAliens(100);
+    this._allocateBrains(50);
     this._updateDeadline();
   }
 
-  spawnFormations() {
-    const now = this._game.time.now;
-    if (this._formations.length && now >= this._deadline) {
-      const formationData = /*this._formations[0] as FormationSpec;*/this._formations.shift() as FormationSpec;
-      const formation = this._spawnFormation(formationData);
-      this._applyEffects(formationData, formation);
-      this._updateDeadline();
-    }
+  update() {
+    this._physicsTimeTotal += this._game.time.physicsElapsed;
+    this._spawnFormations();
   }
 
   private _updateDeadline() {
@@ -87,15 +91,25 @@ export default class FormationManager {
       let { at, delay } = this._formations[0];
       if (typeof at !== 'undefined') {
         at = Math.max(0, at || 0);
-        this._deadline = this._timeOrigin + at * 1000;
+        this._deadline = this._timeOrigin + at;
       }
       else {
         delay = Math.max(0, delay || 0);
         if (!isFinite(this._deadline)) {
           this._deadline = this._timeOrigin;
         }
-        this._deadline += delay * 1000;
+        this._deadline += delay;
       }
+    }
+  }
+
+  private _spawnFormations() {
+    const now = this._physicsTimeTotal;
+    if (this._formations.length && now >= this._deadline) {
+      const formationData = /*this._formations[0] as FormationSpec;*/this._formations.shift() as FormationSpec;
+      const formation = this._spawnFormation(formationData);
+      this._applyEffects(formationData, formation);
+      this._updateDeadline();
     }
   }
 
@@ -105,11 +119,19 @@ export default class FormationManager {
     const formation = new FormationClass(this._game, formationData);
     const { locations } = formation;
     const brainCount = brainPositions.length;
-    const enemies = this._getAliens(locations - brainCount);
+    const enemies = this._getAliens(locations.length - brainCount);
     const brains = this._getBrains(brainCount);
 
     formation.init(enemies, brains, brainPositions);
     return this._game.add.existing(formation);
+  }
+
+  private _allocateAliens(count: number) {
+    this._allocateEnemies(Alien, count);
+  }
+
+  private _allocateBrains(count: number) {
+    this._allocateEnemies(Brain, count);
   }
 
   private _getAliens(count: number) {
@@ -122,9 +144,7 @@ export default class FormationManager {
 
   private _getEnemies<E extends Enemy>(klass: TypeOf<E>, count: number) {
     const items: Array<E> = [];
-
-    // From the pool
-    var type = klass.name.toLowerCase();
+    const type = klass.name.toLowerCase();
     for (let i = 0, l = this._enemies[type].length; i < l; i++) {
       let enemy = this._enemies[type][i];
       if (!enemy.alive) {
@@ -135,20 +155,26 @@ export default class FormationManager {
         return items;
       }
     }
+    items.concat(this._allocateEnemies(klass, count - items.length));
+    return items;
+  }
 
-    // Brand new
-    for (let i = 0, l = count - items.length; i < l; i++) {
+  private _allocateEnemies<E extends Enemy>(klass: TypeOf<E>, count: number) {
+    const items: Array<E> = [];
+    const type = klass.name.toLowerCase();
+    for (let i = 0; i < count; i++) {
       let enemy = new klass(this._game);
       this._enemies[type].push(enemy);
       items.push(enemy);
+      enemy.kill();
     }
     return items;
   }
 
-  private _applyEffects(formationData, formation) {
+  private _applyEffects(formationData: FormationSpec, formation: RadialFormation) {
     const { pulse, rotate, follow } = formationData;
     if (pulse) {
-      formation.enablePulse(pulse.amplitude, pulse.speed);
+      formation.enablePulse(pulse.amplitude, pulse.frequency);
     }
     if (rotate) {
       formation.enableRotation(rotate);
