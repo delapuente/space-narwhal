@@ -1,14 +1,39 @@
 {
   "formations": [
     {
+      "shape": "Delta",
+      "radius": 100,
+      "brainPositions": [2],
+      "follow": {
+        "path": [
+          [200, "top"],
+          [200, "bottom"]
+        ],
+        "duration": 5
+      }
+    },
+    {
       "delay": 4,
       "shape": "Delta",
       "radius": 100,
       "brainPositions": [2],
       "follow": {
         "path": [
-          ["randomX", "top"],
-          ["randomX", "bottom"]
+          [300, "top"],
+          [300, "bottom"]
+        ],
+        "duration": 5
+      }
+    },
+    {
+      "delay": 4,
+      "shape": "Delta",
+      "radius": 100,
+      "brainPositions": [2],
+      "follow": {
+        "path": [
+          [400, "top"],
+          [400, "bottom"]
         ],
         "duration": 5
       }

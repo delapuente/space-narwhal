@@ -1,6 +1,6 @@
 import Narwhal from './Narwhal';
+import { Brain } from './enemies';
 import FormationManager from './FormationManager';
-import { Diamond, Formation } from './Formation';
 
 class Level extends Phaser.State {
 
@@ -83,8 +83,8 @@ class Level extends Phaser.State {
     );
   }
 
-  _onNarwhalVsBrain(narwhal, brain) {
-    brain.kill();
+  _onNarwhalVsBrain(narwhal, brain: Brain) {
+    brain.burst();
   }
 };
 

@@ -72,7 +72,7 @@ export default class FormationManager {
   spawnFormations() {
     const now = this._game.time.now;
     if (this._formations.length && now >= this._deadline) {
-      const formationData = this._formations[0] as FormationSpec;//this._formations.shift() as FormationSpec;
+      const formationData = /*this._formations[0] as FormationSpec;*/this._formations.shift() as FormationSpec;
       const formation = this._spawnFormation(formationData);
       this._applyEffects(formationData, formation);
       this._updateDeadline();
@@ -121,7 +121,7 @@ export default class FormationManager {
   }
 
   private _getEnemies<E extends Enemy>(klass: TypeOf<E>, count: number) {
-    const items: Array<Enemy> = [];
+    const items: Array<E> = [];
 
     // From the pool
     var type = klass.name.toLowerCase();

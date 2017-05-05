@@ -44,7 +44,7 @@ abstract class Formation extends Phaser.Group {
           console.error('Insufficient brains to cover all locations.')
         }
         else {
-          brain.events.onKilled.addOnce(
+          brain.onBurst.addOnce(
             this._checkDestruction, this, 0, index
           );
           this._brains.push(brain);
@@ -105,11 +105,29 @@ abstract class Formation extends Phaser.Group {
     if (this._brains.length) {
       return;
     }
-    this._destroyFormation();
+    this._destroyFormation(formationIndex);
   }
 
-  private _destroyFormation() {
-    this._destroyShape().then(() => this.destroy(false));
+  private _checkOutOfScreen() {
+    const { x, y, width, height } = this.getBounds();
+    const formationBounds = new Phaser.Rectangle(x, y, width, height);
+    const cameraView = this.game.camera.view;
+    const isOutside =
+      !Phaser.Rectangle.intersects(formationBounds, cameraView);
+    if (isOutside) {
+      this._destroyImmediately();
+    }
+  }
+
+  private _destroyFormation(formationIndex) {
+    this._destroyShape(formationIndex).then(
+      () => this.destroy(false)
+    );
+  }
+
+  private _destroyImmediately() {
+    this.children.forEach(container => container[0] && container[0].kill());
+    this.destroy(false);
   }
 
   protected _destroyShape(from = 0): Promise<void> {
@@ -124,16 +142,18 @@ abstract class Formation extends Phaser.Group {
           if (enemy) {
             enemy.kill();
           }
-          if (i === end) {
+          if (i === end - 1) {
             fulfil();
           }
-        }, i * 50);
+        }, (i - from) * 50);
       }
     });
   }
 
-  private _rotate(t: number, dt: number) {
-    this.rotation += this._rotationSpeed * dt;
+  private _move(t: number, dt: number) {
+    const percentage = (t - this._path.startTime) / this._path.duration;
+    this.x = this.game.math.bezierInterpolation(this._path.x, percentage);
+    this.y = this.game.math.bezierInterpolation(this._path.y, percentage);
   }
 
   private _pulsate(t: number, dt: number) {
@@ -148,21 +168,8 @@ abstract class Formation extends Phaser.Group {
     });
   }
 
-  private _move(t: number, dt: number) {
-    const percentage = (t - this._path.startTime) / this._path.duration;
-    this.x = this.game.math.bezierInterpolation(this._path.x, percentage);
-    this.y = this.game.math.bezierInterpolation(this._path.y, percentage);
-  }
-
-  private _checkOutOfScreen() {
-    const { x, y, width, height } = this.getBounds();
-    const formationBounds = new Phaser.Rectangle(x, y, width, height);
-    const cameraView = this.game.camera.view;
-    const isOutside =
-      !Phaser.Rectangle.intersects(formationBounds, cameraView);
-    if (isOutside) {
-      this._destroyFormation();
-    }
+  private _rotate(t: number, dt: number) {
+    this.rotation += this._rotationSpeed * dt;
   }
 
 }

@@ -5,4 +5,15 @@ export default abstract class Enemy extends Phaser.Sprite {
     this.anchor.setTo(0.5);
   }
 
+  reset() {
+    super.reset(0, 0);
+    for (let name in this.events) {
+      const member = this.events[name];
+      if (member instanceof Phaser.Signal) {
+        (member as Phaser.Signal).removeAll();
+      }
+    }
+    return this;
+  }
+
 }
