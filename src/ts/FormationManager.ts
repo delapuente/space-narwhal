@@ -19,7 +19,9 @@ type FormationSpec = {
   pulse?: PulseSpec,
   follow?: { path: PathSpec, duration: number },
   delay?: number,
-  at?: number
+  at?: number,
+  repeat?: number | string,
+  wait?: number
 };
 
 export default class FormationManager {
@@ -106,14 +108,30 @@ export default class FormationManager {
   private _spawnFormations() {
     const now = this._physicsTimeTotal;
     if (this._formations.length && now >= this._deadline) {
-      const formationData = /*this._formations[0] as FormationSpec;*/this._formations.shift() as FormationSpec;
+      const formationData = this._formations.shift() as FormationSpec;
+      const { repeat = 1, wait = 0 } = formationData;
+      if (repeat > 1) {
+        formationData.repeat = toInt(repeat) - 1;
+        formationData.delay = wait;
+        this._formations.unshift(formationData);
+      }
       const formation = this._spawnFormation(formationData);
       this._applyEffects(formationData, formation);
       this._updateDeadline();
     }
+
+    function toInt(v:number|string) {
+      if (typeof v === 'number') {
+        return v;
+      }
+      else if (v === 'Infinity') {
+        return Infinity;
+      }
+      return parseInt(v, 10);
+    }
   }
 
-  private _spawnFormation(formationData: FormationSpec) {
+  private _spawnFormation(formationData: FormationSpec) : RadialFormation {
     const { shape, brainPositions } = formationData;
     const FormationClass = FORMATIONS[shape];
     const formation = new FormationClass(this._game, formationData);
@@ -127,11 +145,11 @@ export default class FormationManager {
   }
 
   private _allocateAliens(count: number) {
-    this._allocateEnemies(Alien, count);
+    return this._allocateEnemies(Alien, count);
   }
 
   private _allocateBrains(count: number) {
-    this._allocateEnemies(Brain, count);
+    return this._allocateEnemies(Brain, count);
   }
 
   private _getAliens(count: number) {
@@ -146,16 +164,15 @@ export default class FormationManager {
     const items: Array<E> = [];
     const type = klass.name.toLowerCase();
     for (let i = 0, l = this._enemies[type].length; i < l; i++) {
-      let enemy = this._enemies[type][i];
+      const enemy = this._enemies[type][i];
       if (!enemy.alive) {
-        enemy.reset(0, 0);
         items.push(enemy);
       }
       if (items.length === count) {
         return items;
       }
     }
-    items.concat(this._allocateEnemies(klass, count - items.length));
+    items.push(...this._allocateEnemies(klass, count - items.length));
     return items;
   }
 

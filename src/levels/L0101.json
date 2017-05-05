@@ -6,12 +6,14 @@
       "brainPositions": [2],
       "follow": {
         "path": [
-          [200, "top"],
-          [200, "bottom"]
+          ["randomX", "top"],
+          ["randomY", "bottom"]
         ],
         "duration": 5
       },
-      "pulse": { "amplitude": 3, "frequency": 0.4 }
+      "pulse": { "amplitude": 12, "frequency": 0.8 },
+      "repeat": "Infinity",
+      "wait": 1
     },
     {
       "delay": 4,

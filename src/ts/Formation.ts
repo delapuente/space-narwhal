@@ -98,6 +98,7 @@ abstract class RadialFormation extends Phaser.Group {
   }
 
   private _destroyImmediately() {
+    this.callAll('kill', null);
     this.destroy(false);
   }
 

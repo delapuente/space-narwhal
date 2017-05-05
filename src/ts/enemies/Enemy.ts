@@ -21,6 +21,7 @@ export default abstract class Enemy extends Phaser.Sprite {
   // between the enemy and the formation.
   reset(x: number, y: number, health?: number | undefined): this {
     super.reset(x, y, health);
+    this.updateTransform();
     this._placement.setTo(x, y);
     this._distance = this._placement.getMagnitude();
     this._resetEvents();
