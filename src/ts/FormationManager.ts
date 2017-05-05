@@ -28,6 +28,8 @@ export default class FormationManager {
 
   private readonly _game: Phaser.Game;
 
+  private _layer: Phaser.Group;
+
   private _physicsTimeTotal: number = 0;
 
   private readonly _screen: { [s: string]: number };
@@ -72,9 +74,10 @@ export default class FormationManager {
     };
   }
 
-  init(formations: Array<FormationSpec>) {
+  init(formations: Array<FormationSpec>, layer: Phaser.Group) {
     this._formations = formations;
     this._timeOrigin = this._physicsTimeTotal;
+    this._layer = layer;
     this._allocateAliens(100);
     this._allocateBrains(50);
     this._updateDeadline();
@@ -141,7 +144,7 @@ export default class FormationManager {
     const brains = this._getBrains(brainCount);
 
     formation.init(enemies, brains, brainPositions);
-    return this._game.add.existing(formation);
+    return this._layer.addChild(formation);
   }
 
   private _allocateAliens(count: number) {

@@ -1,4 +1,4 @@
-// Type definitions for PIXI with Phaser Deviations. 
+// Type definitions for PIXI with Phaser Deviations.
 
 declare module PIXI {
 
@@ -518,8 +518,8 @@ declare module PIXI {
         width: number;
         ignoreChildInput: boolean;
 
-        addChild(child: DisplayObject): DisplayObject;
-        addChildAt(child: DisplayObject, index: number): DisplayObject;
+        addChild<D extends DisplayObject>(child: D): D;
+        addChildAt<D extends DisplayObject>(child: D, index: number): D;
         getBounds(targetCoordinateSpace?: DisplayObject | Matrix): Rectangle;
         getChildAt(index: number): DisplayObject;
         getChildIndex(child: DisplayObject): number;

@@ -34,8 +34,10 @@ class Level extends Phaser.State {
 
   create() {
     this.game.add.image(0, 0, 'bg-ocean');
-    this._spawnNarwhal();
-    this._initFormations();
+    const enemyLayer = this.game.add.group();
+    const characterLayer = this.game.add.group();
+    this._spawnNarwhal(characterLayer);
+    this._initFormations(enemyLayer);
   }
 
   update() {
@@ -44,19 +46,18 @@ class Level extends Phaser.State {
     this._handleCollisions();
   }
 
-  private _spawnNarwhal() {
+  private _spawnNarwhal(layer: Phaser.Group) {
     this._narwhal = new Narwhal(
       this.game,
       this.game.world.centerX,
       this.game.world.centerY
     );
-    this.game.add.existing(this._narwhal);
-    this._narwhal.animations.play('idle');
+    layer.addChild(this._narwhal);
   }
 
-  private _initFormations() {
+  private _initFormations(layer: Phaser.Group) {
     var levelData = this.game.cache.getJSON('level');
-    this._formationManager.init(levelData.formations);
+    this._formationManager.init(levelData.formations, layer);
   }
 
   private _handleInput() {
