@@ -1,0 +1,52 @@
+{"frames": {
+
+"idle/0001.png":
+{
+	"frame": {"x":1,"y":1,"w":72,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":72},
+	"sourceSize": {"w":72,"h":72}
+},
+"idle/0002.png":
+{
+	"frame": {"x":1,"y":75,"w":72,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":72},
+	"sourceSize": {"w":72,"h":72}
+},
+"idle/0003.png":
+{
+	"frame": {"x":1,"y":149,"w":72,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":72},
+	"sourceSize": {"w":72,"h":72}
+},
+"idle/0004.png":
+{
+	"frame": {"x":75,"y":1,"w":72,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":72},
+	"sourceSize": {"w":72,"h":72}
+},
+"idle/0005.png":
+{
+	"frame": {"x":75,"y":75,"w":72,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":72},
+	"sourceSize": {"w":72,"h":72}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "enemy-01.png",
+	"format": "RGBA8888",
+	"size": {"w":222,"h":222},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a04720fab22b6177381b916f3587c8bf:40412fa73b91b0ae8ba34cd21204a34c:7e6d9b0a0e3b23f2968e478056f69079$"
+}
+}
