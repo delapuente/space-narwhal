@@ -21,6 +21,10 @@ class Level extends Phaser.State {
   }
 
   preload() {
+    this.game.load.atlasJSONHash(
+      'char:1',
+      'assets/animations/char-01.png', 'assets/animations/char-01.json'
+    );
     this.game.load.json('level', 'levels/L0101.json');
     this.game.load.image('bg-ocean', 'assets/back-01.png');
     this.game.load.image('narwhal', 'assets/char-01.png');
@@ -47,6 +51,7 @@ class Level extends Phaser.State {
       this.game.world.centerY
     );
     this.game.add.existing(this._narwhal);
+    this._narwhal.animations.play('idle');
   }
 
   private _initFormations() {
