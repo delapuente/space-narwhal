@@ -49,7 +49,7 @@ export default class FormationManager {
   private _deadline: number = Infinity;
 
   get brains() {
-    return this._enemies.brain;
+    return this._enemies.brain.filter(brain => brain.alive);
   }
 
   constructor(game: Phaser.Game) {
@@ -78,8 +78,8 @@ export default class FormationManager {
     this._formations = formations;
     this._timeOrigin = this._physicsTimeTotal;
     this._layer = layer;
-    this._allocateAliens(100);
-    this._allocateBrains(50);
+    this._allocateAliens(60);
+    this._allocateBrains(10);
     this._updateDeadline();
   }
 

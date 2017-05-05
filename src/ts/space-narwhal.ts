@@ -87,6 +87,7 @@ class Level extends Phaser.State {
 
   _onNarwhalVsBrain(narwhal, brain: Brain) {
     brain.burst();
+    narwhal.attack();
   }
 };
 
