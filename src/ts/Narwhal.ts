@@ -19,7 +19,8 @@ export default class Narwhal extends Phaser.Sprite {
     this._setupAnimations();
   }
 
-  attack(brain?: Brain) {
+  attack(brain: Brain) {
+    brain.burst();
     this._attacking = true;
   }
 

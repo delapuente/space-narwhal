@@ -1,7 +1,13 @@
+import { RadialFormation } from '../Formation';
+
 export default abstract class Enemy extends Phaser.Sprite {
 
   get distance() {
     return this._distance;
+  }
+
+  get formation() {
+    return this._formation;
   }
 
   get placement() {
@@ -10,6 +16,8 @@ export default abstract class Enemy extends Phaser.Sprite {
 
   private _distance: number|undefined;
 
+  private _formation: RadialFormation;
+
   private readonly _placement: Phaser.Point = new Phaser.Point();
 
   constructor(game: Phaser.Game, key: string) {
@@ -17,11 +25,10 @@ export default abstract class Enemy extends Phaser.Sprite {
     this.anchor.setTo(0.5);
   }
 
-  //TODO: Consider a separated .place() method to highlight the relation
-  // between the enemy and the formation.
-  reset(x: number, y: number, health?: number | undefined): this {
-    super.reset(x, y, health);
+  place(formation: RadialFormation, x: number, y: number): this {
+    super.reset(x, y);
     this.updateTransform();
+    this._formation = formation;
     this._placement.setTo(x, y);
     this._distance = this._placement.getMagnitude();
     this._resetEvents();

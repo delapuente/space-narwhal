@@ -15,6 +15,8 @@ abstract class RadialFormation extends Phaser.Group {
 
   abstract locations: Array<Phaser.Point>;
 
+  paused: boolean;
+
   private readonly _brains: Array<Brain> = [];
 
   private _rotation: number = 0;
@@ -72,12 +74,14 @@ abstract class RadialFormation extends Phaser.Group {
   }
 
   update() {
-    const dt = this.game.time.physicsElapsed;
-    const t = this._physicsTimeTotal += dt;
-    this._rotate(t, dt);
-    this._pulsate(t, dt);
-    this._move(t, dt);
-    this._checkOutOfScreen();
+    if (!this.paused) {
+      const dt = this.game.time.physicsElapsed;
+      const t = this._physicsTimeTotal += dt;
+      this._rotate(t, dt);
+      this._pulsate(t, dt);
+      this._move(t, dt);
+      this._checkOutOfScreen();
+    }
   }
 
   private _checkOutOfScreen() {
@@ -130,7 +134,7 @@ abstract class RadialFormation extends Phaser.Group {
       const isBrainPlace = brainPositions.indexOf(index) >= 0;
       const enemy = isBrainPlace ? brains.pop() : aliens.pop();
       if (enemy) {
-        enemy.reset(x, y);
+        enemy.place(this, x, y);
         enemy.rotation = Math.atan(y / x) + DEG_90 + (x < 0 ? DEG_180 : 0);
         this.addChild(enemy);
       }
@@ -160,9 +164,13 @@ abstract class RadialFormation extends Phaser.Group {
   }
 
   private _tryToDestroy(brain: Brain) {
-    this._brains.splice(this._brains.indexOf(brain), 1);
+    this.paused = true;
+    this._brains.splice(this._brains.indexOf(brain), 1)[0].kill();
     if (this._brains.length === 0) {
       this._destroyAnimated();
+    }
+    else {
+      this.paused = false;
     }
   }
 }

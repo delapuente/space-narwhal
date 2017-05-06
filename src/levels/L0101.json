@@ -2,7 +2,7 @@
   "formations": [
     {
       "shape": "Delta",
-      "radius": 100,
+      "radius": 110,
       "brainPositions": [2],
       "follow": {
         "path": [
@@ -11,7 +11,7 @@
         ],
         "duration": 5
       },
-      "pulse": { "amplitude": 12, "frequency": 0.8 },
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
       "repeat": "Infinity",
       "wait": 1
     },
