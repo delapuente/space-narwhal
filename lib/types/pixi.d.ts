@@ -519,7 +519,7 @@ declare module PIXI {
         ignoreChildInput: boolean;
 
         addChild<D extends DisplayObject>(child: D): D;
-        addChildAt<D extends DisplayObject>(child: D, index: number): D;
+        addChildAt(child: DisplayObject, index: number): DisplayObject;
         getBounds(targetCoordinateSpace?: DisplayObject | Matrix): Rectangle;
         getChildAt(index: number): DisplayObject;
         getChildIndex(child: DisplayObject): number;
