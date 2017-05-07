@@ -15,9 +15,10 @@ type NarwhalState =
   'injured' |
   'recovering' |
   'dying' |
-  'dead';
+  'dead' |
+  'back()';
 
-type NarwhalActions =
+type NarwhalAction =
   'attack' |
   'animation:attacking:end' |
   'takeDamage' |
@@ -29,12 +30,14 @@ type NarwhalActions =
   'ready';
 
 type NarwhalMachine = {
-  [state in NarwhalState]?: { [action in NarwhalActions]?: NarwhalState }
+  [state in NarwhalState]?: { [action in NarwhalAction]?: NarwhalState }
 };
 
 export default class Narwhal extends Phaser.Sprite {
 
   private _attacking: boolean = false;
+
+  private _formerState: NarwhalState | undefined;
 
   private _frames;
 
@@ -48,7 +51,7 @@ export default class Narwhal extends Phaser.Sprite {
       'takeDamage': 'takingDamage'
     },
     'attacking': {
-      'animation:attacking:end': 'idle'
+      'animation:attacking:end': 'back()'
     },
     'takingDamage': {
       'die': 'dying',
@@ -97,7 +100,7 @@ export default class Narwhal extends Phaser.Sprite {
     }
   }
 
-  private _can(action: NarwhalActions) {
+  private _can(action: NarwhalAction) {
     const transitions = this._animationMachine[this._state] || {};
     return action in transitions;
   }
@@ -111,14 +114,14 @@ export default class Narwhal extends Phaser.Sprite {
   }
 
   private _onCompleteAnimation(_, animation: Phaser.Animation) {
-    this._transition(`animation:${animation.name}:end` as NarwhalActions);
+    this._transition(`animation:${animation.name}:end` as NarwhalAction);
   }
 
-  private onenterattacking(previous, brain) {
+  private onenterattacking(brain) {
     brain.burst();
   }
 
-  private onenterdead(previous) {
+  private onenterdead() {
     this.body.collideWorldBounds = false;
   }
 
@@ -138,16 +141,18 @@ export default class Narwhal extends Phaser.Sprite {
     this._transition(this._lives === 1 ? 'die' : 'dropLife');
   }
 
-  private _transition(action: NarwhalActions, ...args) {
+  private _transition(action: NarwhalAction, ...args) {
     const transitions = this._animationMachine[this._state];
     if (transitions) {
       if (action in transitions) {
-        const newState = transitions[action] as NarwhalState;
+        const newState =
+          (transitions[action] === 'back()' ?
+           this._formerState : transitions[action]) as NarwhalState;
         if (this._state !== newState) {
-          const formerState = this._state;
+          this._formerState = this._state;
           this._state = newState;
           const enterName = `onenter${newState}`;
-          this[enterName] && this[enterName](formerState, ...args);
+          this[enterName] && this[enterName](...args);
         }
       }
     }
