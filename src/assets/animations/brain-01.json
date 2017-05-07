@@ -1,0 +1,52 @@
+{"frames": {
+
+"0001.png":
+{
+	"frame": {"x":1,"y":1,"w":52,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":52},
+	"sourceSize": {"w":52,"h":52}
+},
+"0002.png":
+{
+	"frame": {"x":1,"y":55,"w":52,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":52},
+	"sourceSize": {"w":52,"h":52}
+},
+"0003.png":
+{
+	"frame": {"x":55,"y":1,"w":52,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":52},
+	"sourceSize": {"w":52,"h":52}
+},
+"0004.png":
+{
+	"frame": {"x":1,"y":109,"w":52,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":52},
+	"sourceSize": {"w":52,"h":52}
+},
+"0005.png":
+{
+	"frame": {"x":55,"y":55,"w":52,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":52},
+	"sourceSize": {"w":52,"h":52}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "brain-01.png",
+	"format": "RGBA8888",
+	"size": {"w":162,"h":162},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:e499d4f0b297fcf05751c25e5a24d54f:b0a26796a3dcb5a104fdf046a9507653:a7f3ffe9e841e1182a1e9b2d7439c478$"
+}
+}
