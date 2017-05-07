@@ -2541,7 +2541,9 @@ declare module Phaser {
         constructor(a?: number, b?: number, c?: number, d?: number, tx?: number, ty?: number);
 
         apply(pos: Phaser.Point, newPos?: Phaser.Point): Phaser.Point;
+        apply(pos: Phaser.Point, newPos: Phaser.Point): Phaser.Point;
         applyInverse(pos: Phaser.Point, newPos?: Phaser.Point): Phaser.Point;
+        applyInverse(pos: Phaser.Point, newPos: Phaser.Point): Phaser.Point;
         clone(output?: Phaser.Matrix): Phaser.Matrix;
         copyFrom(matrix: Phaser.Matrix): Phaser.Matrix;
         copyTo(matrix: Phaser.Matrix): Phaser.Matrix;
