@@ -35,7 +35,7 @@ abstract class RadialFormation extends Phaser.Group {
   }
 
   init(aliens: Array<Alien>, brains: Array<Brain>, brainPositions: Array<number>) {
-    //TODO: Enable physics for aliens
+    aliens.forEach(alien => this.game.physics.enable(alien));
     brains.forEach(brain => {
       brain.onBurst.addOnce(this._tryToDestroy, this);
       this.game.physics.enable(brain);

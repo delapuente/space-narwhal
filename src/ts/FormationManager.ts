@@ -52,6 +52,10 @@ export default class FormationManager {
     return this._enemies.brain.filter(brain => brain.alive);
   }
 
+  get aliens() {
+    return this._enemies.alien.filter(alien => alien.alive);
+  }
+
   constructor(game: Phaser.Game) {
     this._game = game;
     //TODO: Inject in the constructor.

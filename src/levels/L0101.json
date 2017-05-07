@@ -9,11 +9,11 @@
           ["randomX", "top"],
           ["randomY", "bottom"]
         ],
-        "duration": 5
+        "duration": 3
       },
       "pulse": { "amplitude": 6, "frequency": 0.8 },
       "repeat": "Infinity",
-      "wait": 1
+      "wait": 0.75
     },
     {
       "delay": 4,

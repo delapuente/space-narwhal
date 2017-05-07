@@ -4,11 +4,67 @@ import { Brain } from './enemies';
 /** Movement speed for the hero narwhal. */
 const SPEED = 800;
 
+const SINKING_SPEED = 100;
+
+const RECOVERING_TIME = 3000;
+
+type NarwhalState =
+  'idle' |
+  'attacking' |
+  'takingDamage' |
+  'injured' |
+  'recovering' |
+  'dying' |
+  'dead';
+
+type NarwhalActions =
+  'attack' |
+  'animation:attacking:end' |
+  'takeDamage' |
+  'die' |
+  'dropLife' |
+  'animation:injured:end' |
+  'die' |
+  'animation:dying:end' |
+  'ready';
+
+type NarwhalMachine = {
+  [state in NarwhalState]?: { [action in NarwhalActions]?: NarwhalState }
+};
+
 export default class Narwhal extends Phaser.Sprite {
+
+  private _attacking: boolean = false;
 
   private _frames;
 
-  private _attacking: boolean = false;
+  private _lives: number = 3;
+
+  private _state: NarwhalState = 'idle';
+
+  private readonly _animationMachine: NarwhalMachine = {
+    'idle': {
+      'attack': 'attacking',
+      'takeDamage': 'takingDamage'
+    },
+    'attacking': {
+      'animation:attacking:end': 'idle'
+    },
+    'takingDamage': {
+      'die': 'dying',
+      'dropLife': 'injured'
+    },
+    'injured': {
+      'animation:injured:end': 'recovering'
+    },
+    'recovering':  {
+      'attack': 'attacking',
+      'ready': 'idle'
+    },
+    'dying': {
+      'animation:dying:end': 'dead'
+    }
+  };
 
   constructor(game, x, y) {
     super(game, x, y, 'char:1', 'idle/0001.png');
@@ -20,30 +76,81 @@ export default class Narwhal extends Phaser.Sprite {
   }
 
   attack(brain: Brain) {
-    brain.burst();
-    this._attacking = true;
+    this._transition('attack', brain);
+  }
+
+  takeDamage() {
+    this._transition('takeDamage');
   }
 
   move(direction) {
-    this.body.velocity.x = direction.x * SPEED;
-    this.body.velocity.y = direction.y * SPEED;
+    if (this._canMove()) {
+      this.body.velocity.x = direction.x * SPEED;
+      this.body.velocity.y = direction.y * SPEED;
+    }
   }
 
   update() {
     this.animations.play(this._getAnimation());
-    if (this._attacking) {
-      this.animations.currentAnim.onComplete.addOnce(() => {
-        this._attacking = false;
-      });
+    if (this._state === 'dead') {
+      this.body.velocity.setTo(0, SINKING_SPEED);
     }
   }
 
+  private _can(action: NarwhalActions) {
+    const transitions = this._animationMachine[this._state] || {};
+    return action in transitions;
+  }
+
+  private _canMove() {
+    return this._state !== 'dying' && this._state !== 'dead';
+  }
+
   private _getAnimation() {
-    let animation = 'idle';
-    if (this._attacking) {
-      animation = 'attack';
+    return this._state;
+  }
+
+  private _onCompleteAnimation(_, animation: Phaser.Animation) {
+    this._transition(`animation:${animation.name}:end` as NarwhalActions);
+  }
+
+  private onenterattacking(previous, brain) {
+    brain.burst();
+  }
+
+  private onenterdead(previous) {
+    this.body.collideWorldBounds = false;
+  }
+
+  private onenterdying() {
+    this.body.velocity.setTo(0, 0);
+  }
+
+  private onenterinjured() {
+    this._lives--;
+  }
+
+  private onenterrecovering() {
+    setTimeout(() => this._transition('ready'), RECOVERING_TIME);
+  }
+
+  private onentertakingDamage() {
+    this._transition(this._lives === 1 ? 'die' : 'dropLife');
+  }
+
+  private _transition(action: NarwhalActions, ...args) {
+    const transitions = this._animationMachine[this._state];
+    if (transitions) {
+      if (action in transitions) {
+        const newState = transitions[action] as NarwhalState;
+        if (this._state !== newState) {
+          const formerState = this._state;
+          this._state = newState;
+          const enterName = `onenter${newState}`;
+          this[enterName] && this[enterName](formerState, ...args);
+        }
+      }
     }
-    return animation;
   }
 
   private _setupAnimations() {
@@ -51,11 +158,32 @@ export default class Narwhal extends Phaser.Sprite {
       'idle',
       this._frames('idle', [1, 5], [4, 2]), 10,
       true, false
-    );
+    ).onComplete.add(this._onCompleteAnimation, this);
+
     this.animations.add(
-      'attack',
+      'attacking',
       this._frames('attack', [1, 6], [6], [6], [6]), 25
-    );
+    ).onComplete.add(this._onCompleteAnimation, this);
+
+    this.animations.add(
+      'dying',
+      this._frames('death', [1, 9]), 10
+    ).onComplete.add(this._onCompleteAnimation, this);
+
+    this.animations.add(
+      'recovering',
+      this._frames('recovering', [1, 3]), 10
+    ).onComplete.add(this._onCompleteAnimation, this);
+
+    this.animations.add(
+      'injured',
+      this._frames('damage', [1, 3], [3, 1]), 10
+    ).onComplete.add(this._onCompleteAnimation, this);
+
+    this.animations.add(
+      'dead',
+      this._frames('death', [9]), 1
+    ).onComplete.add(this._onCompleteAnimation, this);
   }
 
 };

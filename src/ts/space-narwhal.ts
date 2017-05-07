@@ -1,5 +1,5 @@
 import Narwhal from './Narwhal';
-import { Brain } from './enemies';
+import { Alien, Brain } from './enemies';
 import FormationManager from './FormationManager';
 
 class Level extends Phaser.State {
@@ -83,9 +83,18 @@ class Level extends Phaser.State {
       this._onNarwhalVsBrain,
       undefined, this
     );
+    this.game.physics.arcade.overlap(
+      this._narwhal, this._formationManager.aliens,
+      this._onNarwhalVsAlien,
+      undefined, this
+    );
   }
 
-  _onNarwhalVsBrain(narwhal, brain: Brain) {
+  _onNarwhalVsAlien(narwhal: Narwhal, alien: Alien) {
+    narwhal.takeDamage();
+  }
+
+  _onNarwhalVsBrain(narwhal: Narwhal, brain: Brain) {
     narwhal.attack(brain);
   }
 };
