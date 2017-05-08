@@ -158,6 +158,13 @@ class Level extends Phaser.State {
     this._narwhal.events.onOutOfBounds.addOnce(() => {
       this.game.state.start(this.game.state.current);
     });
+    this._narwhal.onDie.addOnce(() => {
+      this.game.camera.onFadeComplete.addOnce(() => {
+        this.game.camera.resetFX();
+        this.game.state.start(this.game.state.current);
+      });
+      this.game.camera.fade(0, 5000);
+    }, this);
   }
 
   private _updateHud() {

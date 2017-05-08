@@ -35,6 +35,10 @@ type NarwhalMachine = {
 
 export default class Narwhal extends Phaser.Sprite {
 
+  onDropLife = new Phaser.Signal();
+
+  onDie = new Phaser.Signal();
+
   private _attacking: boolean = false;
 
   private _formerState: NarwhalState | undefined;
@@ -72,8 +76,6 @@ export default class Narwhal extends Phaser.Sprite {
   get lives() {
     return this._lives;
   }
-
-  onDropLife = new Phaser.Signal();
 
   constructor(game, x, y) {
     super(game, x, y, 'char:1', 'idle/0001.png');
@@ -130,6 +132,7 @@ export default class Narwhal extends Phaser.Sprite {
   private onenterdead() {
     this.body.collideWorldBounds = false;
     this.checkWorldBounds = true;
+    this.onDie.dispatch();
   }
 
   private onenterdying() {
