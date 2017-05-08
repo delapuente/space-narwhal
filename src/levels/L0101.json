@@ -12,36 +12,41 @@
         "duration": 3
       },
       "pulse": { "amplitude": 6, "frequency": 0.8 },
-      "repeat": "Infinity",
+      "repeat": 10,
       "wait": 0.75
     },
     {
-      "delay": 4,
-      "shape": "Delta",
-      "radius": 100,
-      "brainPositions": [2],
+      "delay": 2,
+      "shape": "Diamond",
+      "radius": 110,
+      "brainPositions": [0],
       "follow": {
         "path": [
-          [300, "top"],
-          [300, "bottom"]
+          ["randomX", "top"],
+          ["randomY", "bottom"]
         ],
-        "duration": 5
+        "duration": 3
       },
-      "pulse": { "amplitude": 3, "frequency": 0.4 }
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
+      "rotate": 1,
+      "repeat": 10,
+      "wait": 0.75
     },
     {
-      "delay": 4,
+      "delay": 2,
       "shape": "Delta",
-      "radius": 100,
+      "radius": 110,
       "brainPositions": [2],
       "follow": {
         "path": [
-          [400, "top"],
-          [400, "bottom"]
+          ["randomX", "top"],
+          ["randomY", "bottom"]
         ],
-        "duration": 5
+        "duration": 3
       },
-      "pulse": { "amplitude": 3, "frequency": 0.4 }
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
+      "repeat": "Infinity",
+      "wait": 0.75
     }
   ]
 }
