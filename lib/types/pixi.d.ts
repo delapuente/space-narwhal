@@ -463,7 +463,7 @@ declare module PIXI {
         cacheAsBitmap: boolean;
         defaultCursor: string;
         filterArea: Rectangle;
-        filters: AbstractFilter[];
+        filters: AbstractFilter[]|undefined;
         hitArea: HitArea;
         interactive: boolean;
         mask: Graphics;
