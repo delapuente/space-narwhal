@@ -1,0 +1,52 @@
+{
+  "formations": [
+    {
+      "shape": "Delta",
+      "radius": 110,
+      "brainPositions": [2],
+      "follow": {
+        "path": [
+          ["randomX", "top"],
+          ["randomY", "bottom"]
+        ],
+        "duration": 3
+      },
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
+      "repeat": 10,
+      "wait": 0.75
+    },
+    {
+      "delay": 2,
+      "shape": "Diamond",
+      "radius": 110,
+      "brainPositions": [0],
+      "follow": {
+        "path": [
+          ["randomX", "top"],
+          ["randomY", "bottom"]
+        ],
+        "duration": 3
+      },
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
+      "rotate": 1,
+      "repeat": 10,
+      "wait": 0.75
+    },
+    {
+      "delay": 2,
+      "shape": "Delta",
+      "radius": 110,
+      "brainPositions": [2],
+      "follow": {
+        "path": [
+          ["randomX", "top"],
+          ["randomY", "bottom"]
+        ],
+        "duration": 3
+      },
+      "pulse": { "amplitude": 6, "frequency": 0.8 },
+      "repeat": "Infinity",
+      "wait": 0.75
+    }
+  ]
+}
