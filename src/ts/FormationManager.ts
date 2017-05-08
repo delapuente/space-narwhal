@@ -88,8 +88,8 @@ export default class FormationManager {
     this._formations = formations;
     this._timeOrigin = this._physicsTimeTotal;
     this._layer = layer;
-    this._allocateAliens(60);
-    this._allocateBrains(10);
+    this._allocateAliens(500);
+    this._allocateBrains(50);
     this._updateDeadline();
   }
 

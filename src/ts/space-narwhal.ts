@@ -2,8 +2,11 @@ import Narwhal from './Narwhal';
 import { Alien, Brain } from './enemies';
 import FormationManager from './FormationManager';
 import { SpaceNarwhalLoader } from './utils';
+import { Ocean } from './environments';
 
 class Level extends Phaser.State {
+
+  private _environment: Ocean;
 
   private _narwhal: Narwhal;
 
@@ -22,6 +25,7 @@ class Level extends Phaser.State {
       down: Phaser.KeyCode.DOWN
     });
     this._formationManager = new FormationManager(this.game);
+    this._environment = new Ocean(this.game);
   }
 
   preload() {
@@ -30,8 +34,10 @@ class Level extends Phaser.State {
       'assets/animations/char-01.png', 'assets/animations/char-01.json'
     );
     this.game.load.json('level', 'levels/L0101.json');
-    //this.game.load.webfont('score-font', 'Revalia');
-    this.game.load.image('bg-ocean', 'assets/back-01.png');
+    this.game.load.webfont('score-font', 'Revalia');
+    this.game.load.image('bg:background', 'assets/back-01.png');
+    this.game.load.image('bg:fx:1', 'assets/back-fx-back.png');
+    this.game.load.image('bg:fx:2', 'assets/back-fx-front.png');
     this.game.load.image('narwhal', 'assets/char-01.png');
     this.game.load.image('alien', 'assets/enemy-01.png');
     this.game.load.image('brain', 'assets/brain-01.png');
@@ -40,10 +46,11 @@ class Level extends Phaser.State {
   }
 
   create() {
-    this.game.add.image(0, 0, 'bg-ocean');
+    const bgLayer = this.game.add.group();
     const enemyLayer = this.game.add.group();
     const characterLayer = this.game.add.group();
     const hudLayer = this.game.add.group();
+    this._initEnvironment(bgLayer);
     this._spawnNarwhal(characterLayer);
     this._initFormations(enemyLayer);
     this._createHud(hudLayer);
@@ -51,6 +58,7 @@ class Level extends Phaser.State {
 
   update() {
     this._formationManager.update();
+    this._environment.update();
     this._handleInput();
     this._handleCollisions();
     this._updateHud();
@@ -72,8 +80,8 @@ class Level extends Phaser.State {
 
     // Score
     const score = new Phaser.Group(this.game);
-    const enemyIndicator = new Phaser.Image(this.game, 0, -43, 'hud:enemy');
-    this._score = new Phaser.Text(this.game, 45, -35, 'x0000', {
+    const enemyIndicator = new Phaser.Image(this.game, 0, 0, 'hud:enemy');
+    this._score = new Phaser.Text(this.game, 45, 0, 'x0000', {
       font: 'Revalia',
       fontSize: '38px',
       fill: 'white'
@@ -82,8 +90,13 @@ class Level extends Phaser.State {
     score.addChild(enemyIndicator);
     score.addChild(this._score);
     score.updateTransform();
-    score.position.setTo(15, 60);
+    score.position.setTo(15, 15);
     hudLayer.addChild(score);
+  }
+
+
+  private _initEnvironment(layer: Phaser.Group) {
+    this._environment.init({ fx: 2, speeds: [10, 20] }, layer);
   }
 
   private _initFormations(layer: Phaser.Group) {
