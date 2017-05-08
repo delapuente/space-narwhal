@@ -12,7 +12,7 @@ type NarwhalState =
   'idle' |
   'attacking' |
   'takingDamage' |
-  'injured' |
+  'aching' |
   'recovering' |
   'dying' |
   'dead' |
@@ -24,7 +24,7 @@ type NarwhalAction =
   'takeDamage' |
   'die' |
   'dropLife' |
-  'animation:injured:end' |
+  'animation:aching:end' |
   'die' |
   'animation:dying:end' |
   'ready';
@@ -55,10 +55,10 @@ export default class Narwhal extends Phaser.Sprite {
     },
     'takingDamage': {
       'die': 'dying',
-      'dropLife': 'injured'
+      'dropLife': 'aching'
     },
-    'injured': {
-      'animation:injured:end': 'recovering'
+    'aching': {
+      'animation:aching:end': 'recovering'
     },
     'recovering':  {
       'attack': 'attacking',
@@ -129,7 +129,7 @@ export default class Narwhal extends Phaser.Sprite {
     this.body.velocity.setTo(0, 0);
   }
 
-  private onenterinjured() {
+  private onenteraching() {
     this._lives--;
   }
 
@@ -181,7 +181,7 @@ export default class Narwhal extends Phaser.Sprite {
     ).onComplete.add(this._onCompleteAnimation, this);
 
     this.animations.add(
-      'injured',
+      'aching',
       this._frames('damage', [1, 3], [3, 1]), 10
     ).onComplete.add(this._onCompleteAnimation, this);
 
