@@ -33,14 +33,20 @@ class Level extends Phaser.State {
       'char:1',
       'assets/animations/char-01.png', 'assets/animations/char-01.json'
     );
+    this.game.load.atlasJSONHash(
+      'alien',
+      'assets/animations/enemy-01.png', 'assets/animations/enemy-01.json'
+    );
+    this.game.load.atlasJSONHash(
+      'brain',
+      'assets/animations/brain-01.png', 'assets/animations/brain-01.json'
+    );
     this.game.load.json('level', 'levels/L0101.json');
     this.game.load.webfont('score-font', 'Revalia');
     this.game.load.image('bg:background', 'assets/back-01.png');
     this.game.load.image('bg:fx:1', 'assets/back-fx-back.png');
     this.game.load.image('bg:fx:2', 'assets/back-fx-front.png');
     this.game.load.image('narwhal', 'assets/char-01.png');
-    this.game.load.image('alien', 'assets/enemy-01.png');
-    this.game.load.image('brain', 'assets/brain-01.png');
     this.game.load.image('hud:heart', 'assets/hud-life.png');
     this.game.load.image('hud:enemy', 'assets/hud-enemy.png');
   }
