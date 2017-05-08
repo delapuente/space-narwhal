@@ -48,12 +48,18 @@ export default class FormationManager {
 
   private _deadline: number = Infinity;
 
+  private _enemyKilled: number = 0;
+
   get brains() {
     return this._enemies.brain.filter(brain => brain.alive);
   }
 
   get aliens() {
     return this._enemies.alien.filter(alien => alien.alive);
+  }
+
+  get enemyKilled() {
+    return this._enemyKilled;
   }
 
   constructor(game: Phaser.Game) {
@@ -142,6 +148,9 @@ export default class FormationManager {
     const { shape, brainPositions } = formationData;
     const FormationClass = FORMATIONS[shape];
     const formation = new FormationClass(this._game, formationData);
+    formation.onDestroyedByCharacter.addOnce(enemyCount => {
+      this._enemyKilled += enemyCount;
+    }, this);
     const { locations } = formation;
     const brainCount = brainPositions.length;
     const enemies = this._getAliens(locations.length - brainCount);

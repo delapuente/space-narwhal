@@ -4866,7 +4866,7 @@ declare module Phaser {
         tab?: number;
         tabs?: number;
 
-        fontSize?: number;
+        fontSize?: number|string;
         fontStyle?: string;
         fontVariant?: string;
         fontWeight?: string | number;

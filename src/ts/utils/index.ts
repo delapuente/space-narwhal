@@ -20,4 +20,32 @@ function genFrames(prefix: string, suffix: string, digits: number) : ShortGenFra
   }
 }
 
-export { genFrames };
+class SpaceNarwhalLoader extends Phaser.Loader {
+
+  constructor(game: Phaser.Game) {
+    super(game);
+  }
+
+  webfont(key: string, fontName: string, overwrite = false) : this {
+    this.addToFileList('webfont', key, fontName);
+    return this;
+  }
+
+  loadFile(file) {
+    super.loadFile(file);
+    if (file.type === 'webfont') {
+      // file.url contains the web font
+      document.fonts.load(`10pt "${file.url}"`).then(
+        () => {
+            this.asyncComplete(file);
+        },
+        () =>  {
+            this.asyncComplete(file, `Error loading font ${file.url}`);
+        }
+      );
+    }
+  }
+
+}
+
+export { genFrames, SpaceNarwhalLoader };

@@ -30,6 +30,8 @@ abstract class RadialFormation extends Phaser.Group {
 
   private _pulse: Pulse = { amplitude: 0, frequency: 0 };
 
+  onDestroyedByCharacter = new Phaser.Signal();
+
   constructor(game: Phaser.Game) {
     super(game);
   }
@@ -96,9 +98,10 @@ abstract class RadialFormation extends Phaser.Group {
   }
 
   private _destroyAnimated() {
-    this._destroyShape().then(
-      () => this.destroy(false)
-    );
+    this._destroyShape().then(() => {
+      this.onDestroyedByCharacter.dispatch(this.locations.length);
+      this.destroy(false)
+    });
   }
 
   private _destroyImmediately() {
@@ -182,18 +185,23 @@ class Diamond extends RadialFormation {
 
   private readonly _radius: number;
 
+  private _locations;
+
   get locations() {
-    const radius = this._radius;
-    return [
-      new Phaser.Point(0, radius),
-      new Phaser.Point(radius / 2, radius / 2),
-      new Phaser.Point(radius, 0),
-      new Phaser.Point(radius / 2, -radius / 2),
-      new Phaser.Point(0, -radius),
-      new Phaser.Point(-radius / 2, -radius / 2),
-      new Phaser.Point(-radius, 0),
-      new Phaser.Point(-radius / 2, radius / 2)
-    ];
+    if (!this._locations) {
+      const radius = this._radius;
+      this._locations = [
+        new Phaser.Point(0, radius),
+        new Phaser.Point(radius / 2, radius / 2),
+        new Phaser.Point(radius, 0),
+        new Phaser.Point(radius / 2, -radius / 2),
+        new Phaser.Point(0, -radius),
+        new Phaser.Point(-radius / 2, -radius / 2),
+        new Phaser.Point(-radius, 0),
+        new Phaser.Point(-radius / 2, radius / 2)
+      ];
+    }
+    return this._locations;
   }
 
   constructor(game: Phaser.Game, { radius } = Diamond.defaults) {
@@ -215,15 +223,20 @@ class Diamond extends RadialFormation {
 
 class Delta extends RadialFormation {
 
+  private _locations;
+
   get locations(): Array<Phaser.Point> {
-    const radius = this._radius;
-    return [
-      new Phaser.Point(radius, 0),
-      new Phaser.Point(radius / 2, radius / 2),
-      new Phaser.Point(0, radius),
-      new Phaser.Point(-radius / 2, radius / 2),
-      new Phaser.Point(-radius, 0),
-    ];
+    if (!this._locations) {
+      const radius = this._radius;
+      this._locations = [
+        new Phaser.Point(radius, 0),
+        new Phaser.Point(radius / 2, radius / 2),
+        new Phaser.Point(0, radius),
+        new Phaser.Point(-radius / 2, radius / 2),
+        new Phaser.Point(-radius, 0),
+      ];
+    }
+    return this._locations;
   }
 
   private static defaults: DiamonParameters = { radius: 100 };

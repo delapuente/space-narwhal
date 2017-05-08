@@ -69,6 +69,12 @@ export default class Narwhal extends Phaser.Sprite {
     }
   };
 
+  get lives() {
+    return this._lives;
+  }
+
+  onDropLife = new Phaser.Signal();
+
   constructor(game, x, y) {
     super(game, x, y, 'char:1', 'idle/0001.png');
     this._frames = genFrames('', '.png', 4);
@@ -123,14 +129,17 @@ export default class Narwhal extends Phaser.Sprite {
 
   private onenterdead() {
     this.body.collideWorldBounds = false;
+    this.checkWorldBounds = true;
   }
 
   private onenterdying() {
     this.body.velocity.setTo(0, 0);
+    this.onDropLife.dispatch();
   }
 
   private onenteraching() {
     this._lives--;
+    this.onDropLife.dispatch();
   }
 
   private onenterrecovering() {
