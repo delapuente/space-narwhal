@@ -72,7 +72,7 @@ class Level extends Phaser.State {
 
     // Score
     const score = new Phaser.Group(this.game);
-    const enemyIndicator = new Phaser.Image(this.game, 0, -45, 'hud:enemy');
+    const enemyIndicator = new Phaser.Image(this.game, 0, -43, 'hud:enemy');
     this._score = new Phaser.Text(this.game, 45, -35, 'x0000', {
       font: 'Revalia',
       fontSize: '38px',
