@@ -1,5 +1,6 @@
 import { genFrames } from './utils';
 import { Brain } from './enemies';
+import { White } from './shaders';
 
 /** Movement speed for the hero narwhal. */
 const SPEED = 800;
@@ -41,13 +42,17 @@ export default class Narwhal extends Phaser.Sprite {
 
   private _attacking: boolean = false;
 
+  private _blinking;
+
   private _formerState: NarwhalState | undefined;
 
   private _frames;
 
-  private _lives: number = 3;
+  private _lives: number = 10;
 
   private _state: NarwhalState = 'idle';
+
+  private _whiteFilter: Phaser.Filter;
 
   private readonly _animationMachine: NarwhalMachine = {
     'idle': {
@@ -80,6 +85,8 @@ export default class Narwhal extends Phaser.Sprite {
   constructor(game, x, y) {
     super(game, x, y, 'char:1', 'idle/0001.png');
     this._frames = genFrames('', '.png', 4);
+    this._whiteFilter = this.game.add.filter('White') as White;
+    this._whiteFilter.force = 0.75;
     this.anchor.setTo(0.5);
     this.game.physics.enable(this);
     this.body.collideWorldBounds = true;
@@ -108,6 +115,15 @@ export default class Narwhal extends Phaser.Sprite {
     }
   }
 
+  private _blink() {
+    if (this.filters) {
+      this.filters = undefined;
+    }
+    else {
+      this.filters = [this._whiteFilter];
+    }
+  }
+
   private _can(action: NarwhalAction) {
     const transitions = this._animationMachine[this._state] || {};
     return action in transitions;
@@ -115,6 +131,11 @@ export default class Narwhal extends Phaser.Sprite {
 
   private _canMove() {
     return this._state !== 'dying' && this._state !== 'dead';
+  }
+
+  private _clearBlink() {
+    this.filters = undefined;
+    clearInterval(this._blinking);
   }
 
   private _getAnimation() {
@@ -127,6 +148,10 @@ export default class Narwhal extends Phaser.Sprite {
 
   private onenterattacking(brain) {
     brain.burst();
+  }
+
+  private onenteridle() {
+    this._clearBlink();
   }
 
   private onenterdead() {
@@ -143,6 +168,10 @@ export default class Narwhal extends Phaser.Sprite {
   private onenteraching() {
     this._lives--;
     this.onDropLife.dispatch();
+  }
+
+  private onexitaching() {
+    this._blinking = setInterval(() => this._blink(), 150);
   }
 
   private onenterrecovering() {
@@ -163,6 +192,8 @@ export default class Narwhal extends Phaser.Sprite {
         if (this._state !== newState) {
           this._formerState = this._state;
           this._state = newState;
+          const exitName = `onexit${this._formerState}`;
+          this[exitName] && this[exitName](...args);
           const enterName = `onenter${newState}`;
           this[enterName] && this[enterName](...args);
         }

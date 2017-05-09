@@ -3,6 +3,7 @@ import { Alien, Brain } from './enemies';
 import FormationManager from './FormationManager';
 import { SpaceNarwhalLoader } from './utils';
 import { Ocean } from './environments';
+import { White } from './shaders';
 
 class Level extends Phaser.State {
 
@@ -17,6 +18,7 @@ class Level extends Phaser.State {
   private _score: Phaser.Text;
 
   init() {
+    Phaser.Filter.White = White;
     this.game.load = new SpaceNarwhalLoader(this.game);
     this._keys = this.game.input.keyboard.addKeys({
       left: Phaser.KeyCode.LEFT,
