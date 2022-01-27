@@ -3,7 +3,7 @@ import { Alien, Brain } from './enemies';
 import FormationManager from './FormationManager';
 import { SpaceNarwhalLoader } from './utils';
 import { Ocean } from './environments';
-import { White } from './shaders';
+// import { White } from './shaders';
 
 class Level extends Phaser.State {
 
@@ -18,7 +18,7 @@ class Level extends Phaser.State {
   private _score: Phaser.Text;
 
   init() {
-    Phaser.Filter.White = White;
+    // Phaser.Filter.White = White;
     this.game.load = new SpaceNarwhalLoader(this.game);
     this._keys = this.game.input.keyboard.addKeys({
       left: Phaser.KeyCode.LEFT,
@@ -44,7 +44,7 @@ class Level extends Phaser.State {
       'assets/animations/brain-01.png', 'assets/animations/brain-01.json'
     );
     this.game.load.json('level', 'levels/L0101.json');
-    this.game.load.webfont('score-font', 'Revalia');
+    (this.game.load as any).webfont('score-font', 'Revalia');
     this.game.load.image('bg:background', 'assets/back-01.png');
     this.game.load.image('bg:fx:1', 'assets/back-fx-back.png');
     this.game.load.image('bg:fx:2', 'assets/back-fx-front.png');

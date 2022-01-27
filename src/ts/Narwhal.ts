@@ -1,6 +1,6 @@
 import { genFrames } from './utils';
 import { Brain } from './enemies';
-import { White } from './shaders';
+// import { White } from './shaders';
 
 /** Movement speed for the hero narwhal. */
 const SPEED = 800;
@@ -85,8 +85,8 @@ export default class Narwhal extends Phaser.Sprite {
   constructor(game, x, y) {
     super(game, x, y, 'char:1', 'idle/0001.png');
     this._frames = genFrames('', '.png', 4);
-    this._whiteFilter = this.game.add.filter('White') as White;
-    this._whiteFilter.force = 0.75;
+    //this._whiteFilter = this.game.add.filter('White') as White;
+    //this._whiteFilter.force = 0.75;
     this.anchor.setTo(0.5);
     this.game.physics.enable(this);
     this.body.collideWorldBounds = true;
